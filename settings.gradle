@@ -1,0 +1,11 @@
+rootProject.name = 'Transaction-Analytics'
+
+include 'Lambda'
+include 'OLAP'
+include 'Tests'
+
+include 'Lambda:BatchLayer'
+include 'Lambda:Ingestion'
+include 'Lambda:SpeedLayer'
+include 'Events'
+include 'Model'

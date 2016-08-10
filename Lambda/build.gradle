@@ -1,0 +1,5 @@
+group 'org.dmcs'
+
+version '1.0'
+
+//TODO: OOZIE PROJECT + PROPAGATING PROPERTIES
