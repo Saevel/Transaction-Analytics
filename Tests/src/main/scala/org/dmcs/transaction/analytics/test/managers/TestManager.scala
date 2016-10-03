@@ -2,11 +2,12 @@ package org.dmcs.transaction.analytics.test.managers
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern._
+import akka.util.Timeout
 import org.dmcs.transaction.analytics.test.actors.{IngestionActor, PredictionActor}
 import org.dmcs.transaction.analytics.test.dsl.TestConfig
 import org.scalacheck.Gen
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 
 /**
@@ -15,11 +16,14 @@ import scala.concurrent.duration._
 class TestManager {
 
   def run[DataType, ResultType](testConfig: TestConfig[DataType, ResultType])
-                               (implicit conversion: (Any => ResultType), actorSystem: ActorSystem): Double = {
+                               (implicit conversion: (Any => ResultType),
+                                actorSystem: ActorSystem,
+                                timeout: Timeout,
+                                executionContext: ExecutionContext): Double = {
 
     val ingestionActor: ActorRef = actorSystem.actorOf(Props(new IngestionActor(testConfig.ingestor)))
 
-    val predictionActor: ActorRef = actorSystem.actorOf(Props(
+    val predictionActor : ActorRef = actorSystem.actorOf(Props(
       new PredictionActor(testConfig.filters, testConfig.processor))
     )
 
@@ -29,7 +33,7 @@ class TestManager {
         ack <- ingestionActor ? data
         prediction <- (predictionActor ? data) map(conversion)
         result <- testConfig checkResult
-      } yield testConfig.evaluator evaluate(prediction, result),
+      } yield testConfig.evaluator.evaluate(prediction, result),
       3 seconds)
   }
 

@@ -1,8 +1,9 @@
 package org.dmcs.transaction.analytics.lambda.batch.layer.adapters
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SQLContext}
 import org.dmcs.transaction.analytics.lambda.batch.layer.spark.Spark
-import org.dmcs.transaction.analytics.lambda.events.{UserEvent, UserEventType}
+import org.dmcs.transaction.analytics.lambda.events.UserEventType
+import org.dmcs.transaction.analytics.lambda.events.UserEvent
 import org.dmcs.transaction.analytics.lambda.events.UserEventType._
 
 /**
@@ -10,21 +11,25 @@ import org.dmcs.transaction.analytics.lambda.events.UserEventType._
   */
 trait UserEventsAdapter extends Spark {
 
-  def withUserEvents[T](f:(Dataset[UserEvent] => T)):T = {
-    withSparkSql { sqlContext =>
-      f(sqlContext.read.json("").as[UserEvent])
-    }
+  val userEventsPath: String
+
+  def withUserEvents[T](f:(Dataset[UserEvent] => T))(implicit sqlContext: SQLContext): T = {
+    import sqlContext.implicits._
+    f(sqlContext.read.parquet(userEventsPath).as[UserEvent])
   }
 
-  def withUsersCreated = withKind(Created)
-
-  def withUsersUpdated = withKind(Updated)
-
-  def withUsersDeleted = withKind(Deleted)
-
-  private[adapters] def withKind[T](kind: UserEventType.Value)(f:(Dataset[UserEvent] => T)): T = {
-    withUserEvents { events =>
-      f(events.filter(_.kind == kind))
+  def withUsersCreated[T](f: (Dataset[UserEvent] => T))(implicit sqlContext: SQLContext): T =
+    withUserEvents[T]{ events =>
+      f(events.filter(event => event.kind == UserEventType.Created))
     }
-  }
+
+  def withUsersUpdated[T](f: (Dataset[UserEvent] => T))(implicit sqlContext: SQLContext): T =
+    withUserEvents[T]{ events =>
+      f(events.filter(event => event.kind == UserEventType.Updated))
+    }
+
+  def withUsersDeleted[T](f: (Dataset[UserEvent] => T))(implicit sqlContext: SQLContext): T =
+    withUserEvents[T]{ events =>
+      f(events.filter(event => event.kind == UserEventType.Deleted))
+    }
 }

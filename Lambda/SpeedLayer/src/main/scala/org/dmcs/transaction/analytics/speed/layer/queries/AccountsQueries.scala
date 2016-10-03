@@ -27,9 +27,11 @@ trait AccountsQueries {
                                          (f: (Dataset[UserAccount] => T)):(Dataset[UserAccount] => T) = { accounts =>
     f(
       (minAge, maxAge) match {
-        case (Some(min), Some(max)) => accounts.filter(acc => acc.age >= min && acc.age >= max)
-        case (Some(min), None) => accounts.filter(_.age >= min)
-        case (None, Some(max)) => accounts.filter(_.age <= max)
+        case (Some(min), Some(max)) => accounts.filter{ acc =>
+          acc.age.isDefined && acc.age.get >= min && acc.age.get >= max
+        }
+        case (Some(min), None) => accounts.filter(account => account.age.isDefined && account.age.get >= min)
+        case (None, Some(max)) => accounts.filter(account => account.age.isDefined && account.age.get <= max)
         case _ => accounts
       }
     )

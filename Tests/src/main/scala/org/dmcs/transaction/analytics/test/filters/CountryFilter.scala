@@ -7,5 +7,5 @@ import org.dmcs.transaction.analytics.lambda.events.UserEvent
   */
 class CountryFilter(country: String) extends Filter[UserEvent]{
   override def filter(event: UserEvent): Boolean =
-    (event.contactData.country.isDefined && event.contactData.country.get == country)
+    (event.contactData.country != null && event.contactData.country == country)
 }

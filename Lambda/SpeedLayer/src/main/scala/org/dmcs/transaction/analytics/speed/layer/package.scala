@@ -7,18 +7,40 @@ import org.apache.spark.sql.Dataset
   */
 package object layer {
 
-  implicit class NumericAverage[T : Numeric[T]](data: Dataset[T]) {
+  trait DatasetWithAverage {
 
-    val operations = implicitly[Numeric[T]]
+    def average: Double;
+  }
+
+  implicit class IntDatasetWithAverage(data: Dataset[Int]) extends DatasetWithAverage {
 
     def average: Double = {
-      val (sum, count) = data map(value => (value, 1)) reduce { (first, second) =>
+
+      import data.sqlContext.implicits._
+
+      val (sum, count) = data.map(value => (value, 1)).reduce{(first, second) =>
         val (firstSum, firstCount) = first
         val (secondSum, secondCount) = second
-        (operations.plus(firstSum, secondSum), firstCount + secondCount)
+        (firstSum + secondSum, firstCount + secondCount)
       }
 
-      operations.toLong(sum) / count
+      (sum / count)
+    }
+  }
+
+  implicit class DoubleDatasetWithAverage(data: Dataset[Double]) extends DatasetWithAverage {
+
+    def average: Double = {
+
+      import data.sqlContext.implicits._
+
+      val (sum, count) = data.map(value => (value, 1)).reduce{(first, second) =>
+        val (firstSum, firstCount) = first
+        val (secondSum, secondCount) = second
+        (firstSum + secondSum, firstCount + secondCount)
+      }
+
+      (sum / count)
     }
   }
 }

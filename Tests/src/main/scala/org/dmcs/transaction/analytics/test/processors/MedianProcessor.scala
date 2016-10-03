@@ -12,7 +12,7 @@ class MedianProcessor[InputType : Numeric] extends Processor[InputType, InputTyp
     val middleIndex = Math.floorDiv(input.size, 2)
 
     input
-      .toArray
+      .toList
       .sortWith((x, y) => numericOperator.gt(x, y))
       .apply(middleIndex)
   }

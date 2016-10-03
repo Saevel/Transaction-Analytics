@@ -1,6 +1,6 @@
 package org.dmcs.transaction.analytics.lambda.batch.layer.processors
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SQLContext}
 import org.dmcs.transaction.analyst.lambda.model.UserData
 import org.dmcs.transaction.analytics.lambda.batch.layer.adapters.UserEventsAdapter
 
@@ -9,7 +9,7 @@ import org.dmcs.transaction.analytics.lambda.batch.layer.adapters.UserEventsAdap
   */
 trait UsersProcessor extends UserEventsAdapter {
 
-  def constructUsers: Dataset[UserData] = {
+  def constructUsers(implicit sqlContext: SQLContext): Dataset[UserData] = {
     withUsersCreated { created =>
       withUsersUpdated { updated =>
         withUsersDeleted { deleted =>

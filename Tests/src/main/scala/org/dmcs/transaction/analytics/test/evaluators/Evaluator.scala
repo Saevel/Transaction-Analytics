@@ -7,5 +7,5 @@ import scala.concurrent.Future
   */
 trait Evaluator[ResultType] {
 
-  def evaluate(expected: ResultType, actual: Either[Exception, ResultType]): Double
+  def evaluate(expected: ResultType, actual: Either[Throwable, ResultType]): Double
 }

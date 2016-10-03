@@ -11,6 +11,7 @@ trait ClientsAdapter extends Spark {
 
   //TODO: Read actual data
   def withClientData[T](f:(Dataset[UserData] => T)):T = withSparkSql { sqlContext =>
+    import sqlContext.implicits._
     f(sqlContext.read.json("").as[UserData])
   }
 }

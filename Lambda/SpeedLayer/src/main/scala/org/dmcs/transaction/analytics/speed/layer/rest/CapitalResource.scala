@@ -2,52 +2,54 @@ package org.dmcs.transaction.analytics.speed.layer.rest
 
 import java.time.LocalDateTime
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern._
+import akka.util.Timeout
 import org.dmcs.transaction.analytics.speed.layer.actors.commands.{AverageCapitalChangeInPeriod, AverageInsertionInPeriod, AverageWithdrawalInPeriod}
 import spray.routing._
 
-import scala.concurrent.Await
+import scala.concurrent.{Await, ExecutionContext}
 import scala.concurrent.duration._
 
 /**
   * A REST interface for the capital resource.
   */
-trait CapitalResource extends HttpService {
-
-  //TODO: Read from properties
-  val defaultTimeout = 3 seconds
+trait CapitalResource extends HttpService with DefaultTimeout {
 
   val capitalActor: ActorRef
 
   /**
     * A REST interface for the capital resource.
     */
-  def capitalInterface:Route = capitalVarianceInterface ~ averageInsertionInterface ~ averageWithdrawalInterface
+  def capitalInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext):Route =
+    capitalVarianceInterface ~ averageInsertionInterface ~ averageWithdrawalInterface
 
-  private def capitalVarianceInterface: Route = path("capital" / "variance") {
+  private def capitalVarianceInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = path("capital" / "variance") {
     parameters("start" ?, "end" ?) {
       withOptionalInterval { (start, end) =>
-        val average = Await.result(capitalActor ? AverageCapitalChangeInPeriod(start, end), defaultTimeout)
-        complete(average.toString)
+        onSuccess(capitalActor ? AverageCapitalChangeInPeriod(start, end)) { average =>
+          complete(average.toString)
+        }
       }
     }
   }
 
-  private def averageInsertionInterface: Route = path("capital" / "insertions" / "average") {
+  private def averageInsertionInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = path("capital" / "insertions" / "average") {
     parameters("start" ?, "end" ? ) {
       withOptionalInterval {  (start, end) =>
-        val average = Await.result(capitalActor ? AverageInsertionInPeriod(start, end), defaultTimeout)
-        complete(average.toString)
+        onSuccess(capitalActor ? AverageInsertionInPeriod(start, end)) { average =>
+          complete(average.toString)
+        }
       }
     }
   }
 
-  private def averageWithdrawalInterface: Route = path("capital" / "withdrawals" / "average") {
+  private def averageWithdrawalInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = path("capital" / "withdrawals" / "average") {
     parameters("start" ? , "end" ?) {
       withOptionalInterval { (start, end) =>
-        val average = Await.result(capitalActor ? AverageWithdrawalInPeriod(start, end), defaultTimeout)
-        complete(average.toString)
+        onSuccess(capitalActor ? AverageWithdrawalInPeriod(start, end)){ average =>
+          complete(average.toString)
+        }
       }
     }
   }
@@ -60,7 +62,8 @@ trait CapitalResource extends HttpService {
     * @return
     */
   private[rest] def withOptionalInterval(definition: ((Option[LocalDateTime], Option[LocalDateTime]) => Route))
-                                  (start: Option[String], end: Option[String]): Route = {
+                                  (start: Option[String], end: Option[String])
+                                  (implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = {
     val startDate = start map parseTimestamp
     val endDate = end map parseTimestamp
     definition(startDate, endDate)

@@ -9,10 +9,10 @@ import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, Event}
   */
 class PeriodFilter[T <: Event](startDate: Option[LocalDateTime], endDate: Option[LocalDateTime]) extends Filter[T]{
 
-  override def filter(event: T): Boolean = (startDate, endDate) match {
+  override def filter(event: T): Boolean = /*(startDate, endDate) match {
     case (Some(start), Some(end)) => (event.timestamp.isAfter(start) && event.timestamp.isBefore(end))
     case (Some(start), None) => (event.timestamp.isAfter(start))
     case (None, Some(end)) => (event.timestamp.isBefore(end))
     case _ => true
-  }
+  }*/ ???
 }

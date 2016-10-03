@@ -6,5 +6,5 @@ package org.dmcs.transaction.analyst.lambda.model
 case class UserAccount(userId: Long,
                        accountId: Long,
                        balance: Double,
-                       country: String,
-                       age: Int)
+                       country: Option[String],
+                       age: Option[Int])

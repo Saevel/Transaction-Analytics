@@ -1,6 +1,6 @@
 package org.dmcs.transaction.analytics.lambda.batch.layer.adapters
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SQLContext}
 import org.dmcs.transaction.analytics.lambda.batch.layer.spark.Spark
 import org.dmcs.transaction.analytics.lambda.events.{TransactionEvent, TransactionEventType}
 import org.dmcs.transaction.analytics.lambda.events.TransactionEventType._
@@ -10,21 +10,25 @@ import org.dmcs.transaction.analytics.lambda.events.TransactionEventType._
   */
 trait TransactionEventsAdapter extends Spark {
 
-  def withTransactionEvents[T](f:(Dataset[TransactionEvent] => T)): T = {
-    withSparkSql { sqlContext =>
-     f(sqlContext.read.json("").as[TransactionEvent])
-    }
+  val transactionEventsPath: String;
+
+  def withTransactionEvents[T](f:(Dataset[TransactionEvent] => T))(implicit sqlContext: SQLContext): T = {
+    import sqlContext.implicits._
+    f(sqlContext.read.parquet(transactionEventsPath).as[TransactionEvent])
   }
 
-  def withWithdrawalEvents = withKind(Withdrawal)
-
-  def withInsertionEvents = withKind(Insertion)
-
-  def withTransferEvents = withKind(Transfer)
-
-  private[adapters] def withKind[T](kind: TransactionEventType.Value)(f:(Dataset[TransactionEvent] => T)):T = {
-    withTransactionEvents { events =>
-      f(events.filter(_.kind == kind))
+  def withWithdrawalEvents[T](f: (Dataset[TransactionEvent] => T))(implicit sqlContext: SQLContext): T =
+    withTransactionEvents[T]{ events =>
+      f(events.filter(event => event.kind == TransactionEventType.Withdrawal))
     }
-  }
+
+  def withInsertionEvents[T](f: (Dataset[TransactionEvent] => T))(implicit sqlContext: SQLContext): T =
+    withTransactionEvents[T]{ events =>
+      f(events.filter(event => event.kind == TransactionEventType.Insertion))
+    }
+
+  def withTransferEvents[T](f: (Dataset[TransactionEvent] => T))(implicit sqlContext: SQLContext): T =
+    withTransactionEvents[T]{ events =>
+      f(events.filter(event => event.kind == TransactionEventType.Transfer))
+    }
 }

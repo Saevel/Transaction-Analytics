@@ -36,9 +36,9 @@ package object dsl {
     sampleGen filterWith countryFilter process average ingest toHadoop check client.clientAgeAverage evaluate testEvaluator
   */
 
-  implicit case class GenerationConfig[DataType](generator: Gen[Traversable[DataType]]) {
+  implicit class GenerationConfig[DataType](val generator: Gen[Traversable[DataType]]) {
 
-    def filterWith(f: Filter[DataType]*): FilterConfig[DataType] = FilterConfig[DataType](generator, f);
+    def filterUsing(f: Filter[DataType]*): FilterConfig[DataType] = FilterConfig[DataType](generator, f);
 
     def filterWith(f: (DataType => Boolean)*): FilterConfig[DataType] = {
       val filter = f map { lambda =>

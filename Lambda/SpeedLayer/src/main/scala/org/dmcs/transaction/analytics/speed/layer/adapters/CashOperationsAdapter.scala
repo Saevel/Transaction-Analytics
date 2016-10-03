@@ -12,6 +12,7 @@ trait CashOperationsAdapter extends Spark {
   //TODO: Read real data
   //TODO: merge Batch View with Real Time Views
   def withCashOperations[T](f: (Dataset[CashOperation] => T)): T = withSparkSql { sqlContext =>
+    import sqlContext.implicits._
     f(sqlContext.read.json("").as[CashOperation])
   }
 }

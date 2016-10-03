@@ -7,8 +7,6 @@ object Main extends App {
 
   import org.dmcs.transaction.analytics.test.dsl._
 
-  val
-
   //TODO: DSL for tests?
 
 }

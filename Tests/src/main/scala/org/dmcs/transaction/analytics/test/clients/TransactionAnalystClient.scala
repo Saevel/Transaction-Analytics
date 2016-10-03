@@ -17,29 +17,34 @@ class TransactionAnalystClient(sendReceive: SendReceive, host: String, port: Int
 
   private val base = s"$host:$port"
 
-  def activeAccountsByCountry(country: String): Future[Either[Throwable, Long]] =
+  def activeAccountsByCountry(country: String)
+                             (implicit executionContext: ExecutionContext): Future[Either[Throwable, Long]] =
     restQuery(s"$base/accounts/country/$country/active")(_.toLong)
 
   def averageAccountBalanceByCountryAndAge(country: String,
                                            minAge: Option[Int],
-                                           maxAge: Option[Int]): Future[Either[Throwable, Double]] =
+                                           maxAge: Option[Int])
+                                          (implicit executionContext: ExecutionContext): Future[Either[Throwable, Double]] =
     restQuery(s"$base/accounts/country/$country/balance" ? ("minAge" -> minAge) ? ("maxAge" -> maxAge))(_.toDouble)
 
   def capitalVarianceByPeriod(startDate: Option[LocalDateTime],
-                              endDate: Option[LocalDateTime]): Future[Either[Throwable, Double]] =
+                              endDate: Option[LocalDateTime])
+                             (implicit executionContext: ExecutionContext): Future[Either[Throwable, Double]] =
     restQuery(s"$base/capital/variance" ? ("start" -> startDate) ? ("end" -> endDate))(_.toDouble)
 
   def averageInsertionByPeriod(startDate: Option[LocalDateTime],
-                               endDate: Option[LocalDateTime]): Future[Either[Throwable, Double]] =
+                               endDate: Option[LocalDateTime])
+                              (implicit executionContext: ExecutionContext): Future[Either[Throwable, Double]] =
     restQuery(s"$base/capital/insertions/average" ? ("start" -> startDate) ? ("end" -> endDate))(_.toDouble)
 
   def averageWithdrawalByPeriod(startDate: Option[LocalDateTime],
-                                endDate: Option[LocalDateTime]): Future[Either[Throwable, Double]] =
+                                endDate: Option[LocalDateTime])
+                               (implicit executionContext: ExecutionContext): Future[Either[Throwable, Double]] =
     restQuery(s"$base/capital/withdrawals/average" ? ("start" -> startDate) ? ("end" -> endDate))(_.toDouble)
 
-  def clientAgeMedian: Future[Either[Throwable, Int]] = restQuery(s"$base/clients/age/median")(_.toInt)
+  def clientAgeMedian(implicit executionContext: ExecutionContext): Future[Either[Throwable, Int]] = restQuery(s"$base/clients/age/median")(_.toInt)
 
-  def clientAgeAverage: Future[Either[Throwable, Double]] = restQuery(s"$base/clients/age/average")(_.toDouble)
+  def clientAgeAverage(implicit executionContext: ExecutionContext): Future[Either[Throwable, Double]] = restQuery(s"$base/clients/age/average")(_.toDouble)
 
   private implicit class UrlWithQueryParam(baseUrl: String) {
 
@@ -65,12 +70,12 @@ class TransactionAnalystClient(sendReceive: SendReceive, host: String, port: Int
     * @return a <code>Future</code> evaluating either to a <code>Throwable</code> in case of exception
     *         while pre-processing the request or the desired result.
     */
-  private def restQuery[T](url: String)(convert: (String => T)): Future[Either[Throwable, T]] = try {
-    pipeline(Get(url))
-      .map(response => Right[Throwable, T](convert(response.entity.asString)))
-  } catch {
-    case NonFatal(e) => Future(Left[Throwable, T](e))
-  }
+  private def restQuery[T](url: String)(convert: (String => T))(implicit executionContext:ExecutionContext):
+    Future[Either[Throwable, T]] = try {
+      pipeline(Get(url)).map(response => Right[Throwable, T](convert(response.entity.asString)))
+    } catch {
+      case NonFatal(e) => Future(Left[Throwable, T](e))
+    }
 }
 
 object TransactionAnalystClient {

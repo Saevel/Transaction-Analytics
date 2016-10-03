@@ -11,6 +11,7 @@ trait UserAccountsAdapter extends Spark {
 
   //TODO: Read real data!
   def withUserAccounts[T](f: Dataset[UserAccount] => T): T = withSparkSql { sqlContext =>
+    import sqlContext.implicits._
     f(sqlContext.read.json("").as[UserAccount])
   }
 }
