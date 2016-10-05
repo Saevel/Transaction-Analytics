@@ -1,28 +1,32 @@
 package org.dmcs.transaction.analytics.lambda.batch.layer.processors
 
 import org.apache.spark.sql.{Dataset, SQLContext}
+import org.apache.spark.sql.functions._
+
 import org.dmcs.transaction.analyst.lambda.model.UserAccount
-import org.dmcs.transaction.analytics.lambda.batch.layer.adapters.{AccountEventsAdapter, UserEventsAdapter}
-import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, UserEvent}
+import org.dmcs.transaction.analytics.lambda.batch.layer.adapters.{AccountEventsAdapter, TransactionEventsAdapter, UserEventsAdapter}
+import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, TransactionEvent, UserEvent}
 
 /**
   * Created by Zielony on 2016-08-03.
   */
-trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter {
+trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter with TransactionEventsAdapter {
 
-  //TODO: Actual construction, take transfers etc into account
   def constructAccounts(implicit sqlContext: SQLContext): Dataset[UserAccount] = {
     import sqlContext.implicits._
 
     withAllAccountEvents { (accountsCreated, accountsDeleted) =>
       withAllUserEvents { (usersCreated, usersUpdated, usersDeleted) =>
+        withAllTransactionEvents { (transfers, withdrawals, insertions) =>
+          val accounts = activeAccounts(accountsCreated, accountsDeleted)
+          val users = activeUsers(usersCreated, usersUpdated, usersDeleted)
+          val balances = balanceChanges(transfers, withdrawals, insertions)
 
-        val accounts = activeAccounts(accountsCreated, accountsDeleted)
-        val users = activeUsers(usersCreated, usersUpdated, usersDeleted)
-
-        accounts.joinWith(users, $"userId" === $"id").map { pair =>
-          val (account, user) = pair
-          UserAccount(user.id, account.accountId, account.balance, user.contactData.country, user.personalData.age)
+          accounts.joinWith(users, $"userId" === $"id").joinWith(balances, $"userId" === $"id").map {
+            case ((account, user), (id, delta)) =>
+            UserAccount(id, account.accountId, account.balance + delta, user.contactData.country,
+              user.personalData.age)
+          }
         }
       }
     }
@@ -46,6 +50,16 @@ trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter {
       }
     }
 
+  private def withAllTransactionEvents[T](f: (Dataset[TransactionEvent], Dataset[TransactionEvent],
+     Dataset[TransactionEvent]) => T)(implicit sqlContext: SQLContext): T =
+    withWithdrawalEvents[T] { withdrawals =>
+      withInsertionEvents[T] { insertions =>
+        withTransferEvents[T] { transfers =>
+          f(transfers, withdrawals, insertions)
+        }
+      }
+    }
+
   private def activeAccounts(created: Dataset[AccountEvent], deleted: Dataset[AccountEvent])
                             (implicit sqlContext:SQLContext): Dataset[AccountEvent] = {
     import sqlContext.implicits._
@@ -64,7 +78,7 @@ trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter {
       val (removed, _) = pair
       removed
     }
-    //TODO: Aggregate correctly
+
     val latestUpdates = updated.groupBy(_.id).mapGroups((id, iterator) =>
       iterator.reduce { (first, second) =>
         if(first.timestamp.after(second.timestamp)) first else second
@@ -72,8 +86,44 @@ trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter {
     )
 
     created.subtract(createdButRemoved).joinWith(latestUpdates, $"id" === $"id").map{ pair =>
-      val (creation, update) = pair
+      val (_, update) = pair
       update
+    }
+  }
+
+  //TODO: Refactor heavily
+  private def balanceChanges(transfers: Dataset[TransactionEvent],
+                             withdrawals: Dataset[TransactionEvent],
+                             insertions: Dataset[TransactionEvent])
+                            (implicit sqlContext: SQLContext): Dataset[(Long, Double)] = {
+    import sqlContext.implicits._
+
+    val insertionsByAccount = insertions.groupBy(_.sourceAccount).mapGroups {
+      case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
+    }
+
+    val withdrawalsByAccount = withdrawals.groupBy(_.sourceAccount).mapGroups{
+      case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
+    }
+
+    val transferSources = transfers.filter(_.targetAccount.isDefined).groupBy(_.sourceAccount).mapGroups {
+      case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
+    }
+
+    val transferTargets = transfers.filter(_.targetAccount.isDefined).groupBy(_.targetAccount.get).mapGroups{
+      case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
+    }
+
+    val allLosses = withdrawalsByAccount.joinWith(transferSources, $"id" === $"id").map{
+      case ((id, s1),(id2, s2)) => (id, (-1)*(s1 + s2))
+    }
+
+    val allGains = insertionsByAccount.joinWith(transferTargets, $"id" === $"id").map{
+      case ((id1, s1),(id2, s2)) => (id1, s1 + s2)
+    }
+
+    allGains.joinWith(allLosses, $"id" === $"id").map {
+      case ((id, s1), (id2, s2)) => (id, s1 + s2)
     }
   }
 }

@@ -3,7 +3,7 @@ package org.dmcs.transaction.analytics.speed.layer.queries
 import java.sql.Timestamp
 import java.time.LocalDateTime
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SQLContext}
 import org.dmcs.transaction.analyst.lambda.model.{CashOperation, CashOperationType}
 import org.dmcs.transaction.analyst.lambda.model.CashOperationType._
 import org.dmcs.transaction.analytics.speed.layer._
@@ -13,41 +13,44 @@ import org.dmcs.transaction.analytics.speed.layer._
   */
 trait CapitalQueries {
 
-  def averageWithdrawalInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime]) = withKind(Withdrawal)(
+  def averageWithdrawalInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
+                               (implicit sqlContext: SQLContext) = withKind(Withdrawal)(
     inPeriod(startDate, endDate) { operations =>
-      import operations.sqlContext.implicits._
+      import sqlContext.implicits._
       operations.map(_.amount).average
     }
   )
 
-  def averageInsertionInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime]) = withKind(Insertion)(
+  def averageInsertionInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
+                              (implicit sqlContext: SQLContext) = withKind(Insertion)(
     inPeriod(startDate, endDate) { operations =>
-      import operations.sqlContext.implicits._
+      import sqlContext.implicits._
       operations.map(_.amount).average
     }
   )
 
-  def averageCapitalChangeInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime]) =
+  def averageCapitalChangeInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
+                                  (implicit sqlContext: SQLContext) =
     inPeriod(startDate, endDate) { operations =>
-      import operations.sqlContext.implicits._
-      operations
-        .map( operation =>
-          if(operation.kind == Withdrawal) (-1) * operation.amount
-          else if(operation.kind == Insertion) operation.amount
-          else 0.0
-        )
-        .reduce(_ + _)
+      import sqlContext.implicits._
+      operations.map(operation => operation.kind match {
+          case Withdrawal => (-1) * operation.amount
+          case Insertion => operation.amount
+          case _ => 0.0
+        }) reduce(_ + _)
     }
 
-  private[queries] def withKind[T](kind: CashOperationType)(f: (Dataset[CashOperation] => T))
-                                :(Dataset[CashOperation] => T) = { operations =>
-    import operations.sqlContext.implicits._
+  private[queries] def withKind[T](kind: CashOperationType)
+                                  (f: (Dataset[CashOperation] => T))
+                                  (implicit sqlContext: SQLContext):(Dataset[CashOperation] => T) = { operations =>
+    import sqlContext.implicits._
     f(operations.filter(_.kind == kind))
   }
 
   private[queries] def inPeriod[T](startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
-                                  (f: Dataset[CashOperation] => T): (Dataset[CashOperation] => T) = { operations =>
-    import operations.sqlContext.implicits._
+                                  (f: Dataset[CashOperation] => T)
+                                  (implicit sqlContext: SQLContext): (Dataset[CashOperation] => T) = { operations =>
+    import sqlContext.implicits._
     f(
       (startDate, endDate) match {
         case (Some(start), Some(end)) => operations between start and end

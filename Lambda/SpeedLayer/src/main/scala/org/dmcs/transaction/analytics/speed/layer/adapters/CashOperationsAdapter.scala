@@ -1,6 +1,6 @@
 package org.dmcs.transaction.analytics.speed.layer.adapters
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SQLContext}
 import org.dmcs.transaction.analyst.lambda.model.CashOperation
 import org.dmcs.transaction.analytics.speed.layer.spark.Spark
 
@@ -9,10 +9,11 @@ import org.dmcs.transaction.analytics.speed.layer.spark.Spark
   */
 trait CashOperationsAdapter extends Spark {
 
-  //TODO: Read real data
+  val cashOperationsPath: String
+
   //TODO: merge Batch View with Real Time Views
-  def withCashOperations[T](f: (Dataset[CashOperation] => T)): T = withSparkSql { sqlContext =>
+  def withCashOperations[T](f: (Dataset[CashOperation] => T))(implicit sqlContext: SQLContext): T = {
     import sqlContext.implicits._
-    f(sqlContext.read.json("").as[CashOperation])
+    f(sqlContext.read.parquet(cashOperationsPath).as[CashOperation])
   }
 }

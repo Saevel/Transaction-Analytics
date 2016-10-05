@@ -15,9 +15,6 @@ trait Spark {
 
   val sparkProperties: Bundle = load(classpath :/ "spark.properties")
 
-  //TODO: Move to some utils if it works
-  implicit val userEventTypeEncoder: Encoder[UserEventType] = Encoders.kryo(classOf[UserEventType])
-
   def withSpark[T](f: SparkContext => T) = {
     var contextOption: Option[SparkContext] = None;
     try {
