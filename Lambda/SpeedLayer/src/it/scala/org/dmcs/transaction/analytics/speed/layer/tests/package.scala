@@ -19,7 +19,7 @@ package object tests {
       serialize(data, path)
       f()
     } finally {
-      clearDirectory(path)
+      //\clearDirectory(path)
     }
 
   def withParquetData[T, R](data: Dataset[T], path: String)(f: () => R)(implicit sqlContext: SQLContext): R =
@@ -40,6 +40,16 @@ package object tests {
       f(actorSystemOption.get)
     } finally {
       actorSystemOption.foreach(_.shutdown())
+    }
+  }
+
+  implicit class CollectionWithAverage[T : Numeric](collection: Traversable[T]) {
+
+    val operations = implicitly[Numeric[T]]
+
+    def avg: Double = {
+      val sum = collection.fold(operations.zero)((x, y) => operations.plus(x, y))
+      (operations.toDouble(sum) / collection.size)
     }
   }
 

@@ -2,7 +2,7 @@ package org.dmcs.transaction.analytics.speed.layer.actors
 
 import akka.actor.Actor
 import org.apache.spark.sql.SQLContext
-import org.dmcs.transaction.analytics.speed.layer.actors.commands.{AverageCapitalChangeInPeriod, AverageInsertionInPeriod, AverageWithdrawalInPeriod}
+import org.dmcs.transaction.analytics.speed.layer.actors.commands.{CapitalChangeInPeriod, AverageInsertionInPeriod, AverageWithdrawalInPeriod}
 import org.dmcs.transaction.analytics.speed.layer.adapters.CashOperationsAdapter
 import org.dmcs.transaction.analytics.speed.layer.queries.CapitalQueries
 
@@ -18,8 +18,8 @@ class CapitalActor(private val cashOperationsLocation: String, private val sqlCo
 
   override def receive: Receive = {
 
-    case AverageCapitalChangeInPeriod(start, end) => withCashOperations { operations =>
-      sender ! averageCapitalChangeInPeriod(start, end)(sql)(operations)
+    case CapitalChangeInPeriod(start, end) => withCashOperations { operations =>
+      sender ! capitalChangeInPeriod(start, end)(sql)(operations)
     }
     case AverageWithdrawalInPeriod(start, end) => withCashOperations { operations =>
       sender ! averageWithdrawalInPeriod(start, end)(sql)(operations)

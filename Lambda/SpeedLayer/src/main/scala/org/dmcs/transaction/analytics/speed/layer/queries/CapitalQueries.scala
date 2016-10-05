@@ -7,30 +7,28 @@ import org.apache.spark.sql.{Dataset, SQLContext}
 import org.dmcs.transaction.analyst.lambda.model.{CashOperation, CashOperationType}
 import org.dmcs.transaction.analyst.lambda.model.CashOperationType._
 import org.dmcs.transaction.analytics.speed.layer._
+import org.dmcs.transaction.analytics.speed.layer.adapters.CashOperationsAdapter
 
-/**
-  * Created by Zielony on 2016-08-02.
-  */
 trait CapitalQueries {
 
   def averageWithdrawalInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
-                               (implicit sqlContext: SQLContext) = withKind(Withdrawal)(
+                               (implicit sqlContext: SQLContext): (Dataset[CashOperation] => Double) = { operations =>
     inPeriod(startDate, endDate) { operations =>
-      import sqlContext.implicits._
-      operations.map(_.amount).average
-    }
-  )
+        import sqlContext.implicits._
+        operations.filter(_.kind == Withdrawal).map(_.amount).average
+    }(sqlContext)(operations)
+  }
 
   def averageInsertionInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
-                              (implicit sqlContext: SQLContext) = withKind(Insertion)(
+                              (implicit sqlContext: SQLContext): (Dataset[CashOperation] => Double) = { operations =>
     inPeriod(startDate, endDate) { operations =>
       import sqlContext.implicits._
-      operations.map(_.amount).average
-    }
-  )
+      operations.filter(_.kind == Insertion).map(_.amount).average
+    }(sqlContext)(operations)
+  }
 
-  def averageCapitalChangeInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
-                                  (implicit sqlContext: SQLContext) =
+  def capitalChangeInPeriod(startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
+                           (implicit sqlContext: SQLContext) =
     inPeriod(startDate, endDate) { operations =>
       import sqlContext.implicits._
       operations.map(operation => operation.kind match {
@@ -39,13 +37,6 @@ trait CapitalQueries {
           case _ => 0.0
         }) reduce(_ + _)
     }
-
-  private[queries] def withKind[T](kind: CashOperationType)
-                                  (f: (Dataset[CashOperation] => T))
-                                  (implicit sqlContext: SQLContext):(Dataset[CashOperation] => T) = { operations =>
-    import sqlContext.implicits._
-    f(operations.filter(_.kind == kind))
-  }
 
   private[queries] def inPeriod[T](startDate: Option[LocalDateTime], endDate: Option[LocalDateTime])
                                   (f: Dataset[CashOperation] => T)

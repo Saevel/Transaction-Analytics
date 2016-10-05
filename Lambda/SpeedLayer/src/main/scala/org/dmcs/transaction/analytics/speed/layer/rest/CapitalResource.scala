@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern._
 import akka.util.Timeout
-import org.dmcs.transaction.analytics.speed.layer.actors.commands.{AverageCapitalChangeInPeriod, AverageInsertionInPeriod, AverageWithdrawalInPeriod}
+import org.dmcs.transaction.analytics.speed.layer.actors.commands.{CapitalChangeInPeriod, AverageInsertionInPeriod, AverageWithdrawalInPeriod}
 import spray.routing._
 
 import scala.concurrent.{Await, ExecutionContext}
@@ -27,7 +27,7 @@ trait CapitalResource extends HttpService with DefaultTimeout {
   private def capitalVarianceInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = path("capital" / "variance") {
     parameters("start" ?, "end" ?) {
       withOptionalInterval { (start, end) =>
-        onSuccess(capitalActor ? AverageCapitalChangeInPeriod(start, end)) { average =>
+        onSuccess(capitalActor ? CapitalChangeInPeriod(start, end)) { average =>
           complete(average.toString)
         }
       }
@@ -56,6 +56,7 @@ trait CapitalResource extends HttpService with DefaultTimeout {
 
   /**
     * Builds a <code>Route</code> basing on
+ *
     * @param definition the <code>Route</code> building method.
     * @param start an optional, stringified date.
     * @param end

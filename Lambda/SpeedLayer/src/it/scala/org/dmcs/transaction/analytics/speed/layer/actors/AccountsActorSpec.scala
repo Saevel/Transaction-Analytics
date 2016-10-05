@@ -16,9 +16,6 @@ import prv.zielony.proper.utils.load
 
 import scala.concurrent.duration._
 
-/**
-  * Created by Zielony on 2016-10-05.
-  */
 class AccountsActorSpec extends WordSpec with ShouldMatchers with ScalaFutures with Spark with IntegrationPatience
   with DefaultTimeout {
 
