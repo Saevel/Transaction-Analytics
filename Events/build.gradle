@@ -14,4 +14,3 @@ dependencies {
     testCompile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.13.2'
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.6'
 }
-

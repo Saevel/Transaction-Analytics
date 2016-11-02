@@ -1,25 +1,36 @@
 package org.dmcs.transaction.analytics.olap.repositories;
 
-import org.dmcs.transaction.analyst.lambda.model.CashOperation;
+import org.dmcs.transaction.analytics.olap.model.CashOperation;
+import org.dmcs.transaction.analytics.olap.model.CashOperationType;
 import org.springframework.data.cassandra.repository.CassandraRepository;
+import org.springframework.data.cassandra.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Created by Zielony on 2016-08-10.
  */
 @Repository
-public interface TransactionsRepository extends CassandraRepository<CashOperation>{
+public interface TransactionsRepository extends CrudRepository<CashOperation, Long> {
 
-    //TODO: CQL
+    @Query("SELECT * FROM cash_operation WHERE kind = ?0 AND timestamp >= ?1 ALLOW FILTERING")
+    Collection<CashOperation> findByKindAndTimestampAfter(@Param("kind") String kind, @Param("start") long start);
 
-    List<CashOperation> findByKindAndStartDate(String kind, LocalDateTime start);
+    @Query("SELECT * FROM cash_operation WHERE kind = ?0 AND timestamp <= ?1 ALLOW FILTERING")
+    Collection<CashOperation> findByKindAndTimestampBefore(@Param("kind") String kind, @Param("end") long end);
 
-    List<CashOperation> findByKindAndEndDate(String kind, LocalDateTime end);
+    @Query("SELECT * FROM cash_operation WHERE kind = ?0 AND timestamp >= ?1 " +
+            "AND timestamp <= ?2 ALLOW FILTERING")
+    Collection<CashOperation> findByKindAndTimestampBetween(@Param("kind") String kind, @Param("start") long start,
+                                                        @Param("end") long end);
 
-    List<CashOperation> findByKindAndInPeriod(String kind, LocalDateTime start, LocalDateTime end);
-
-    List<CashOperation> findByKind(String kind);
+    @Query("SELECT * FROM cash_operation WHERE kind = ?0")
+    Collection<CashOperation> findByKind(@Param("kind") String kind);
 }

@@ -1,6 +1,7 @@
 package org.dmcs.transaction.analytics.olap.services;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Zielony on 2016-08-10.

@@ -1,6 +1,6 @@
 package org.dmcs.transaction.analytics.olap.services;
 
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.Optional;
 
 /**
@@ -8,9 +8,9 @@ import java.util.Optional;
  */
 public interface TransactionsService {
 
-    Double capitalVarianceInPeriod(Optional<LocalDateTime> minDate, Optional<LocalDateTime> maxDate);
+    Double capitalVarianceInPeriod(Optional<Timestamp> minDate, Optional<Timestamp> maxDate);
 
-    Double averageInsertionInPeriod(Optional<LocalDateTime> minDate, Optional<LocalDateTime> maxDate);
+    Double averageInsertionInPeriod(Optional<Timestamp> minDate, Optional<Timestamp> maxDate);
 
-    Double averageWithdrawalInPeriod(Optional<LocalDateTime> minDate, Optional<LocalDateTime> maxDate);
+    Double averageWithdrawalInPeriod(Optional<Timestamp> minDate, Optional<Timestamp> maxDate);
 }

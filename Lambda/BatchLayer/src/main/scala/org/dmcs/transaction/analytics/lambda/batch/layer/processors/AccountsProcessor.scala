@@ -24,8 +24,8 @@ trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter with
 
           accounts.joinWith(users, $"userId" === $"id").joinWith(balances, $"userId" === $"id").map {
             case ((account, user), (id, delta)) =>
-            UserAccount(id, account.accountId, account.balance + delta, user.contactData.country,
-              user.personalData.age)
+              new UserAccount(id, account.accountId, account.balance + delta, user.contactData.country,
+                user.personalData.age)
           }
         }
       }

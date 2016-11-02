@@ -26,11 +26,15 @@ repositories {
 
 dependencies {
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.4.0.RELEASE'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-cassandra', version: '1.4.0.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.4.1.RELEASE'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-cassandra', version: '1.4.1.RELEASE'
 
-    compile project(':Model')
-    compile project(':Events')
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.4.1.RELEASE'
 
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.4.0.RELEASE'
+    testCompile(group: 'org.cassandraunit', name: 'cassandra-unit-spring', version: '2.1.9.2'){
+        exclude group: 'org.cassandraunit', module: 'cassandra-unit'
+    }
+    testCompile(group: 'org.cassandraunit', name: 'cassandra-unit-shaded', version: '2.1.9.2')
+    testCompile group: 'org.hectorclient', name: 'hector', version: '2.0-0'
+    testCompile group: 'io.netty', name: 'netty-all', version: '4.0.27.Final'
 }
