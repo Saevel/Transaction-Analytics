@@ -6,29 +6,21 @@ import org.scalacheck.Gen
 
 import scala.concurrent.duration.FiniteDuration
 
-/**
-  * Created by Zielony on 2016-10-28.
-  */
-trait TestModelGenerator extends Generator[TestModel] with GeneratorFactory with EntitiesGenerator with EventsGenerator {
+class TestModelGenerator(config: TestModelConfig) extends Generator[TestModel] with GeneratorFactory with EntitiesGenerator with EventsGenerator {
 
-  val config: TestModelConfig;
-
-  def modelGenerator: Gen[TestModel] = for {
+  private def modelGenerator: Gen[TestModel] = for {
     entitiesModel <- entitiesGenerator(config.userCount, config.accountsPerPerson, config.transactionsPerAccount,
       config.transactionSpread, config.minimalInitialAmount)
     eventsModel <- eventsModelGenerator(entitiesModel, config.countries: _*)
   } yield TestModel(eventsModel, entitiesModel)
 
-  protected val generator = scalacheckGenerator(modelGenerator)
+  private val scalacheckGen = scalacheckGenerator(modelGenerator)
 
-  override def generate(implicit timeout: FiniteDuration): TestModel = generator.generate
+  override def generate(implicit timeout: FiniteDuration): TestModel = scalacheckGen.generate
 }
 
 object TestModelGenerator {
-
-  def apply(modelConfig: TestModelConfig): TestModelGenerator = new TestModelGenerator {
-    override val config: TestModelConfig = modelConfig
-  }
+  def apply(modelConfig: TestModelConfig): TestModelGenerator = new TestModelGenerator(modelConfig)
 }
 
 case class TestModelConfig(userCount: Long, accountsPerPerson: Double, transactionsPerAccount: Double,

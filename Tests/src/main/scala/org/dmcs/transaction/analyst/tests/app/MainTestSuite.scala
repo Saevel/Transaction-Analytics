@@ -12,13 +12,36 @@ import org.dmcs.transaction.analyst.tests.framework.reporters.CsvReporter
 import play.api.libs.json.Writes
 import prv.zielony.proper.inject._
 import prv.zielony.proper.converters.auto._
+import prv.zielony.proper.model.Bundle
 import prv.zielony.proper.path.classpath
 import prv.zielony.proper.utils.load
 
 import scala.concurrent.duration.FiniteDuration
 
-object MainTestSuite extends TestSuite[TestModel] with ConsoleLogger with JsonLinesIngestor[TestModel] with CsvReporter
-  with TestModelGenerator {
+object MainTestSuite extends TestSuite[TestModel] with ConsoleLogger with JsonLinesIngestor[TestModel] with CsvReporter {
+
+  implicit val applicationProperties: Bundle = load(classpath :/ "application.properties")
+
+  override val ingestionTargetFile: File = new File(%("ingestion.target.file"))
+
+  override val separator: Char = ','
+
+  override val reportOutput: File = new File(%("reporting.output.file"))
+
+  override implicit val writes: Writes[TestModel] = TestModelJsonWrites.modelWrites
+
+  val config: TestModelConfig = TestModelConfig(
+    userCount = %("users.count"),
+    accountsPerPerson = %("accounts.per.person"),
+    transactionsPerAccount = %("transactions.per.account"),
+    transactionSpread = %("transactions.spread"),
+    minimalInitialAmount = %("minimal.initial.amount"),
+    countries = Seq("Poland", "France", "USA")
+  )
+
+  override val phases: Int = %("test.phases")
+
+  val modelGenerator: TestModelGenerator = TestModelGenerator(config)
 
   module("Transaction Analytics") { implicit m =>
 
@@ -33,26 +56,7 @@ object MainTestSuite extends TestSuite[TestModel] with ConsoleLogger with JsonLi
     should("calculate overall capital variance") { list =>
       1 === 1
     }
-  }
+   }
 
-  implicit val applicationProperties = load(classpath :/ "application.properties")
-
-  override val ingestionTargetFile: File = new File(%("ingestion.target.file"))
-
-  override val separator: Char = ','
-
-  override val reportOutput: File = new File(%("reporting.output.file"))
-
-  override implicit val writes: Writes[TestModel] = TestModelJsonWrites.modelWrites
-
-  override val config: TestModelConfig = TestModelConfig(
-    userCount = %("users.count"),
-    accountsPerPerson = %("accounts.per.person"),
-    transactionsPerAccount = %("transactions.per.account"),
-    transactionSpread = %("transactions.spread"),
-    minimalInitialAmount = %("minimal.initial.amount"),
-    countries = Seq("Poland", "France", "USA")
-  )
-
-  override val phases: Int = %("test.phases")
+  override def generate(implicit timeout: FiniteDuration): TestModel = modelGenerator.generate
 }
