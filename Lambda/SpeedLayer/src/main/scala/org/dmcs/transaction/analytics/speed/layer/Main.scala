@@ -2,8 +2,9 @@ package org.dmcs.transaction.analytics.speed.layer
 
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.util.Timeout
+import org.dmcs.transaction.analytics.olap.rest.RestInterface
 import org.dmcs.transaction.analytics.speed.layer.actors.{AccountsActor, CapitalActor, ClientsActor}
-import org.dmcs.transaction.analytics.speed.layer.rest.{DefaultTimeout, RestInterface}
+import org.dmcs.transaction.analytics.speed.layer.rest.RestInterface
 import org.dmcs.transaction.analytics.speed.layer.spark.Spark
 
 import scala.concurrent.duration._

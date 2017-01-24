@@ -4,8 +4,8 @@ import akka.actor.Props
 import akka.pattern.ask
 import akka.util.Timeout
 import org.dmcs.transaction.analyst.lambda.model.UserAccount
+import org.dmcs.transaction.analytics.olap.rest.DefaultTimeout
 import org.dmcs.transaction.analytics.speed.layer.actors.commands.{CountAccountsByCountry, CountAccountsByCountryAndAgeInterval}
-import org.dmcs.transaction.analytics.speed.layer.rest.DefaultTimeout
 import org.dmcs.transaction.analytics.speed.layer.spark.Spark
 import org.dmcs.transaction.analytics.speed.layer.tests._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}

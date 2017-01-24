@@ -12,7 +12,6 @@ object Main extends App with AccountsProcessor with UsersProcessor with CashOper
 
   val mdsProperties = load(classpath :/ "mds.properties")
   val batchProperties = load(classpath :/ "batch.properties")
-  //TODO: Read from properties.
 
   override val userEventsPath: String = %("mds.events.users" @@ mdsProperties)
   override val transactionEventsPath: String = %("mds.events.transactions" @@ mdsProperties)

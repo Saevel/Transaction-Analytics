@@ -1,10 +1,10 @@
 package org.dmcs.transaction.analyst.lambda.model
 
-case class CashOperationType(value: String)
+case class CashOperationType(value: String) {
+  override def toString: String = value
+}
 
-/**
-  * Created by Zielony on 2016-08-03.
-  */
+
 object CashOperationType {
 
   val Withdrawal = CashOperationType("Withdrawal")
@@ -12,4 +12,11 @@ object CashOperationType {
   val Insertion = CashOperationType("Insertion")
 
   val Transfer = CashOperationType("Transfer")
+
+  def fromString(s: String): CashOperationType = {
+    case "Withdrawal" => Withdrawal
+    case "Insertion" => Insertion
+    case "Transfer" => Transfer
+    case other => throw new IllegalArgumentException(s"Unmapped value for CashOperationType: $other")
+  }
 }

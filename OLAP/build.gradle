@@ -7,15 +7,9 @@ buildscript {
         mavenCentral()
         jcenter()
     }
-
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.4.0.RELEASE")
-    }
 }
 
-apply plugin: 'spring-boot'
-
-apply plugin: 'java'
+apply plugin: 'scala'
 
 sourceCompatibility = 1.8
 
@@ -24,17 +18,44 @@ repositories {
     jcenter()
 }
 
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/it/scala')
+        }
+        resources.srcDir file('src/it/resources')
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
 dependencies {
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: '1.4.1.RELEASE'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-cassandra', version: '1.4.1.RELEASE'
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    compile group: 'com.outworkers', name: 'phantom-streams_2.11', version: '2.0.0'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.0.1'
+    compile group: 'org.typelevel', name: 'cats-core_2.11', version: '0.9.0'
 
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '1.4.1.RELEASE'
 
-    testCompile(group: 'org.cassandraunit', name: 'cassandra-unit-spring', version: '2.1.9.2'){
-        exclude group: 'org.cassandraunit', module: 'cassandra-unit'
-    }
-    testCompile(group: 'org.cassandraunit', name: 'cassandra-unit-shaded', version: '2.1.9.2')
-    testCompile group: 'org.hectorclient', name: 'hector', version: '2.0-0'
-    testCompile group: 'io.netty', name: 'netty-all', version: '4.0.27.Final'
+    compile project(':Model')
+    compile project(':Events')
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.0'
+    testCompile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.12.6'
 }
+
+task it(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+}
+
+check.dependsOn it
+it.mustRunAfter test
