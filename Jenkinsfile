@@ -19,7 +19,7 @@ pipeline {
         }
         stage('IntegrationTest'){
             steps {
-                bat 'gradlew.bat it'
+                bat 'gradlew.bat :Classical:it :Lambda:SpeedLayer:it :Lambda:BatchLayer:it'
             }
         }
         // TODO: Enable when ready
