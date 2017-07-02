@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.model;
+package org.dmcs.transaction.analytics.classical.model;
 
 import com.datastax.driver.core.DataType;
 import org.springframework.data.cassandra.mapping.*;

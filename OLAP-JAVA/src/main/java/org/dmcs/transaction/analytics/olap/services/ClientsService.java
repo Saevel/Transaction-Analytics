@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.services;
+package org.dmcs.transaction.analytics.classical.services;
 
 /**
  * Created by Zielony on 2016-08-10.

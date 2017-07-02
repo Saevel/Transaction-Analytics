@@ -1,10 +1,10 @@
-package org.dmcs.transaction.analytics.olap.repositories;
+package org.dmcs.transaction.analytics.classical.repositories;
 
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper;
-import org.dmcs.transaction.analytics.olap.configuration.RepositoriesTestContext;
-import org.dmcs.transaction.analytics.olap.model.UserAccount;
-import org.dmcs.transaction.analytics.olap.configuration.RepositoriesContext;
-import org.dmcs.transaction.analytics.olap.test.Unit;
+import org.dmcs.transaction.analytics.classical.configuration.RepositoriesTestContext;
+import org.dmcs.transaction.analytics.classical.model.UserAccount;
+import org.dmcs.transaction.analytics.classical.configuration.RepositoriesContext;
+import org.dmcs.transaction.analytics.classical.test.Unit;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

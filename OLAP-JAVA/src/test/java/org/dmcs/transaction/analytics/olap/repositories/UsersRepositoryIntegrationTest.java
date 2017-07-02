@@ -1,8 +1,8 @@
-package org.dmcs.transaction.analytics.olap.repositories;
+package org.dmcs.transaction.analytics.classical.repositories;
 
-import org.dmcs.transaction.analytics.olap.configuration.RepositoriesTestContext;
-import org.dmcs.transaction.analytics.olap.model.UserData;
-import org.dmcs.transaction.analytics.olap.test.Unit;
+import org.dmcs.transaction.analytics.classical.configuration.RepositoriesTestContext;
+import org.dmcs.transaction.analytics.classical.model.UserData;
+import org.dmcs.transaction.analytics.classical.test.Unit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

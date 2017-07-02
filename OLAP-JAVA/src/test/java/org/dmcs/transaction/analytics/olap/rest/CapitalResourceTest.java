@@ -1,12 +1,12 @@
-package org.dmcs.transaction.analytics.olap.rest;
+package org.dmcs.transaction.analytics.classical.rest;
 
-import org.dmcs.transaction.analytics.olap.configuration.ApplicationContext;
-import org.dmcs.transaction.analytics.olap.configuration.RepositoriesTestContext;
-import org.dmcs.transaction.analytics.olap.configuration.ServicesContext;
-import org.dmcs.transaction.analytics.olap.model.CashOperation;
-import org.dmcs.transaction.analytics.olap.model.CashOperationType;
-import org.dmcs.transaction.analytics.olap.repositories.TransactionsRepository;
-import org.dmcs.transaction.analytics.olap.test.Unit;
+import org.dmcs.transaction.analytics.classical.configuration.ApplicationContext;
+import org.dmcs.transaction.analytics.classical.configuration.RepositoriesTestContext;
+import org.dmcs.transaction.analytics.classical.configuration.ServicesContext;
+import org.dmcs.transaction.analytics.classical.model.CashOperation;
+import org.dmcs.transaction.analytics.classical.model.CashOperationType;
+import org.dmcs.transaction.analytics.classical.repositories.TransactionsRepository;
+import org.dmcs.transaction.analytics.classical.test.Unit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.dmcs.transaction.analytics.olap.model.CashOperationType.Insertion;
-import static org.dmcs.transaction.analytics.olap.model.CashOperationType.Transfer;
-import static org.dmcs.transaction.analytics.olap.model.CashOperationType.Withdrawal;
+import static org.dmcs.transaction.analytics.classical.model.CashOperationType.Insertion;
+import static org.dmcs.transaction.analytics.classical.model.CashOperationType.Transfer;
+import static org.dmcs.transaction.analytics.classical.model.CashOperationType.Withdrawal;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

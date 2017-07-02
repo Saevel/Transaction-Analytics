@@ -1,6 +1,6 @@
-package org.dmcs.transaction.analytics.olap.rest;
+package org.dmcs.transaction.analytics.classical.rest;
 
-import org.dmcs.transaction.analytics.olap.services.AccountsService;
+import org.dmcs.transaction.analytics.classical.services.AccountsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;

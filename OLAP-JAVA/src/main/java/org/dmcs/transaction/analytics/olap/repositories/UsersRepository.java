@@ -1,6 +1,6 @@
-package org.dmcs.transaction.analytics.olap.repositories;
+package org.dmcs.transaction.analytics.classical.repositories;
 
-import org.dmcs.transaction.analytics.olap.model.UserData;
+import org.dmcs.transaction.analytics.classical.model.UserData;
 import org.springframework.data.cassandra.repository.CassandraRepository;
 import org.springframework.data.cassandra.repository.Query;
 import org.springframework.data.repository.CrudRepository;

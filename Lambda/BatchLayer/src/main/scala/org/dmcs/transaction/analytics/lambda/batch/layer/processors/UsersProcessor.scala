@@ -29,6 +29,7 @@ trait UsersProcessor extends UserEventsAdapter {
       }
     )
 
+    // TODO: Correct
     created.subtract(createdButRemoved).joinWith(latestUpdates, $"id" === $"id").map{ pair =>
       val (_, update) = pair
       update

@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.configuration;
+package org.dmcs.transaction.analytics.classical.configuration;
 
 import com.sun.media.jfxmediaimpl.MediaDisposer;
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper;

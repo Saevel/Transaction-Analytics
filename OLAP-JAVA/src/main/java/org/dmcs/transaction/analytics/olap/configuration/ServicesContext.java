@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.configuration;
+package org.dmcs.transaction.analytics.classical.configuration;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

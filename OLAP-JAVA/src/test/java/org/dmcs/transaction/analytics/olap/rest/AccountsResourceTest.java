@@ -1,11 +1,11 @@
-package org.dmcs.transaction.analytics.olap.rest;
+package org.dmcs.transaction.analytics.classical.rest;
 
-import org.dmcs.transaction.analytics.olap.configuration.ApplicationContext;
-import org.dmcs.transaction.analytics.olap.configuration.RepositoriesTestContext;
-import org.dmcs.transaction.analytics.olap.configuration.ServicesContext;
-import org.dmcs.transaction.analytics.olap.model.UserAccount;
-import org.dmcs.transaction.analytics.olap.repositories.AccountsRepository;
-import org.dmcs.transaction.analytics.olap.test.Unit;
+import org.dmcs.transaction.analytics.classical.configuration.ApplicationContext;
+import org.dmcs.transaction.analytics.classical.configuration.RepositoriesTestContext;
+import org.dmcs.transaction.analytics.classical.configuration.ServicesContext;
+import org.dmcs.transaction.analytics.classical.model.UserAccount;
+import org.dmcs.transaction.analytics.classical.repositories.AccountsRepository;
+import org.dmcs.transaction.analytics.classical.test.Unit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

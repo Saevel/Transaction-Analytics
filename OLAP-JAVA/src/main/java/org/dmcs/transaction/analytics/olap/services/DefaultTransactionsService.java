@@ -1,8 +1,8 @@
-package org.dmcs.transaction.analytics.olap.services;
+package org.dmcs.transaction.analytics.classical.services;
 
-import org.dmcs.transaction.analytics.olap.model.CashOperation;
-import org.dmcs.transaction.analytics.olap.model.CashOperationType;
-import org.dmcs.transaction.analytics.olap.repositories.TransactionsRepository;
+import org.dmcs.transaction.analytics.classical.model.CashOperation;
+import org.dmcs.transaction.analytics.classical.model.CashOperationType;
+import org.dmcs.transaction.analytics.classical.repositories.TransactionsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

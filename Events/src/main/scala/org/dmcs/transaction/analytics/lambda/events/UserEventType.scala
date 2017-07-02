@@ -6,13 +6,13 @@ case class UserEventType(val value: String) extends Serializable {
 
 object UserEventType extends Serializable{
 
-  val Created = new UserEventType("Created")
+  object Created extends UserEventType("Created")
 
-  val Deleted = new UserEventType("Deleted")
+  object Deleted extends UserEventType("Deleted")
 
-  val Updated = new UserEventType("Updated")
+  object Updated extends UserEventType("Updated")
 
-  def fromString(s: String): UserEventType = {
+  val fromString: (String => UserEventType) = {
     case "Created" => Created
     case "Deleted" => Deleted
     case "Updated" => Updated

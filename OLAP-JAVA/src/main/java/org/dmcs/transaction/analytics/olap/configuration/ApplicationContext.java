@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.configuration;
+package org.dmcs.transaction.analytics.classical.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

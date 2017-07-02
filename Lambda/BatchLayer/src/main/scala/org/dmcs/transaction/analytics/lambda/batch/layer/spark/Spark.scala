@@ -8,9 +8,6 @@ import prv.zielony.proper.path.classpath
 import prv.zielony.proper.utils.load
 import prv.zielony.proper.inject._
 
-/**
-  * Created by Zielony on 2016-08-02.
-  */
 trait Spark {
 
   val sparkProperties: Bundle = load(classpath :/ "spark.properties")

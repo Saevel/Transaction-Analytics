@@ -10,7 +10,7 @@ object AccountEventType extends Serializable {
 
   val Deleted = AccountEventType("Deleted")
 
-  def fromString(s: String): AccountEventType = {
+  val fromString: (String => AccountEventType) = {
     case "Created" => Created
     case "Deleted" => Deleted
     case other => throw new IllegalArgumentException(s"Unmapped value for AccountEventType: $other");

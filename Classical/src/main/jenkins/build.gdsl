@@ -1,0 +1,16 @@
+
+job('Transaction-Analytics/Classical'){
+
+    scm {
+        github 'Saevel/Transaction-Analytics'
+    }
+
+    triggers {
+        githubPush()
+    }
+
+    steps {
+        gradle 'clean build'
+        // gradle 'dockerize'
+    }
+}

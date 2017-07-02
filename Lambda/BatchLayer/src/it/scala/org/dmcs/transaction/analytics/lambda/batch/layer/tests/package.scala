@@ -4,9 +4,6 @@ import java.io.File
 
 import org.apache.spark.sql.{Dataset, SQLContext}
 
-/**
-  * Created by Zielony on 2016-10-02.
-  */
 package object tests {
 
   def withData[T, R](serialize: ((Dataset[T], String) => Unit))

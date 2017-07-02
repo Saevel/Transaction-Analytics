@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.services;
+package org.dmcs.transaction.analytics.classical.services;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;

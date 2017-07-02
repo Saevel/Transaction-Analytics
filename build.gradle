@@ -1,3 +1,35 @@
 group 'org.dmcs'
 
 version '1.0'
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.8'
+    }
+}
+
+apply plugin: 'groovy'
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+// TODO: Probably remove these?
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
+
+// TODO: Get these from envs
+docker {
+    url='tcp://192.168.99.100:2376'
+    certPath = new File('C:\\Users\\kamil\\.docker\\machine\\machines\\default')
+}
+
+task sparkDocker(type: DockerBuildImage){
+    inputDir = project.file(project.projectDir.path + "/src/main/docker")
+}

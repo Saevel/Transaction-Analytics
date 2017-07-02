@@ -12,7 +12,7 @@ object TransactionEventType {
 
   val Transfer = TransactionEventType("Transfer")
 
-  def fromString(s: String): TransactionEventType = {
+  val fromString : (String => TransactionEventType) = {
     case "Insertion" => Insertion
     case "Withdrawal" => Withdrawal
     case "Transfer" => Transfer

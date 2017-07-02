@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.utils;
+package org.dmcs.transaction.analytics.classical.utils;
 
 /**
  * Created by Zielony on 2016-10-13.

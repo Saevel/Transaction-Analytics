@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.events;
+package org.dmcs.transaction.analytics.classical.events;
 
 /**
  * Created by Zielony on 2016-10-16.

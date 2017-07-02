@@ -1,6 +1,6 @@
-package org.dmcs.transaction.analytics.olap;
+package org.dmcs.transaction.analytics.classical;
 
-import org.dmcs.transaction.analytics.olap.configuration.ApplicationContext;
+import org.dmcs.transaction.analytics.classical.configuration.ApplicationContext;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

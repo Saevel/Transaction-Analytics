@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.configuration;
+package org.dmcs.transaction.analytics.classical.configuration;
 
 import com.datastax.driver.core.Cluster;
 import org.springframework.beans.factory.annotation.Autowired;

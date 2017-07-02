@@ -9,9 +9,6 @@ import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, AccountEventT
 import org.dmcs.transaction.analytics.lambda.batch.layer.tests._
 import org.scalatest.{ShouldMatchers, WordSpec}
 
-/**
-  * Created by Zielony on 2016-10-02.
-  */
 class AccountEventAdapterSpec extends WordSpec with ShouldMatchers with AccountEventsAdapter with Spark {
 
   override val accountEventsPath: String = "target/MDS/Account"

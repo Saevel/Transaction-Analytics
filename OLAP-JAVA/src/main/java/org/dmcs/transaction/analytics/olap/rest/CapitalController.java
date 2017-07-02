@@ -1,6 +1,6 @@
-package org.dmcs.transaction.analytics.olap.rest;
+package org.dmcs.transaction.analytics.classical.rest;
 
-import org.dmcs.transaction.analytics.olap.services.TransactionsService;
+import org.dmcs.transaction.analytics.classical.services.TransactionsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpEntity;

@@ -2,7 +2,27 @@ group 'org.dmcs'
 
 version '1.0'
 
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.8'
+    }
+}
+
+project.ext.set("configs", "spark,mds,batch")
+
 apply plugin: 'scala'
+
+apply plugin: 'gradle-one-jar'
+
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 repositories {
     mavenCentral()
@@ -24,6 +44,7 @@ configurations {
     integrationTestRuntime.extendsFrom testRuntime
 }
 
+// TODO: Fix Spark provided dependencies.
 dependencies {
 
     compile project(':Events')
@@ -40,11 +61,55 @@ dependencies {
     integrationTestCompile group: 'io.spray', name: 'spray-client', version: '1.3.1'
 }
 
+// TODO: Get these from envs
+docker {
+    url='tcp://192.168.99.100:2376'
+    certPath = new File('C:\\Users\\kamil\\.docker\\machine\\machines\\default')
+}
+
+// TODO: Create a Docker task
+// TODO: Create Jenkins DSL scripts creating the build for this project.
+// TODO: Copy to all relevant projects
+// TODO: When possible, create and integrate DCOS deployment tasks
+
+task fatJar(type: OneJar){
+    mainClass = 'org.dmcs.transaction.analytics.lambda.batch.layer.BatchLayerApplication'
+}
+
 task it(type: Test) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
 }
 
+task getConfigs(type: Copy){
+    if(project.hasProperty('configs')){
+        configs.split(",").each{ config ->
+            from(rootProject.projectDir.getAbsolutePath() + "/src/main/resources/" + config + ".properties")
+            into(project.buildDir.getAbsolutePath() + "/resources/main")
+        }
+    } else {
+        throw new GradleException("Project: " + project.name + ". Property 'configs' not defined. Cannot execute 'getConfigs' task")
+    }
+}
+
+task prepareDockerBuild(type: Copy) {
+    from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+
+    from(project.projectDir.getAbsolutePath() + "/src/main/docker")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+}
+
+task dockerize(type: DockerBuildImage){
+    inputDir = project.file(project.buildDir.path + "/docker")
+}
+
+// Task dependencies configuration
+dockerize.dependsOn fatJar
+dockerize.dependsOn prepareDockerBuild
+compileScala.dependsOn getConfigs
+fatJar.dependsOn build
+prepareDockerBuild.dependsOn fatJar
 check.dependsOn it
 it.mustRunAfter test

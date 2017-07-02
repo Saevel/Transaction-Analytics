@@ -1,0 +1,97 @@
+group 'org.dmcs'
+version '1.0'
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.8'
+    }
+}
+
+apply plugin: 'scala'
+
+apply plugin: 'gradle-one-jar'
+
+apply plugin: 'groovy'
+
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+sourceSets {
+    integrationTest {
+        java {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+            srcDir file('src/it/scala')
+        }
+        resources.srcDir file('src/it/resources')
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+dependencies {
+
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    compile group: 'com.outworkers', name: 'phantom-streams_2.11', version: '2.0.0'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.0.1'
+    compile group: 'org.typelevel', name: 'cats-core_2.11', version: '0.9.0'
+
+    compile project(':Model')
+    compile project(':Events')
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.0'
+    testCompile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.12.6'
+}
+
+// TODO: Get these from envs
+docker {
+    url='tcp://192.168.99.100:2376'
+    certPath = new File('C:\\Users\\kamil\\.docker\\machine\\machines\\default')
+}
+
+task fatJar(type: OneJar){
+    mainClass = 'org.dmcs.transaction.analytics.classical.ClassicalAnalyticsApplication'
+}
+
+task it(type: Test) {
+    testClassesDir = sourceSets.integrationTest.output.classesDir
+    classpath = sourceSets.integrationTest.runtimeClasspath
+    outputs.upToDateWhen { false }
+}
+
+task prepareDockerBuild(type: Copy) {
+    from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+
+    from(project.projectDir.getAbsolutePath() + "/src/main/docker")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+}
+
+task dockerize(type: DockerBuildImage){
+    inputDir = project.file(project.buildDir.path + "/docker")
+}
+
+dockerize.dependsOn fatJar
+dockerize.dependsOn prepareDockerBuild
+fatJar.dependsOn build
+prepareDockerBuild.dependsOn fatJar
+check.dependsOn it
+it.mustRunAfter test

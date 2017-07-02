@@ -13,7 +13,7 @@ object CashOperationType {
 
   val Transfer = CashOperationType("Transfer")
 
-  def fromString(s: String): CashOperationType = {
+  val fromString: (String => CashOperationType) = {
     case "Withdrawal" => Withdrawal
     case "Insertion" => Insertion
     case "Transfer" => Transfer

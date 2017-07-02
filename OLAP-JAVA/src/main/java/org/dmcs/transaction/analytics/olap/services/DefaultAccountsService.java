@@ -1,8 +1,8 @@
-package org.dmcs.transaction.analytics.olap.services;
+package org.dmcs.transaction.analytics.classical.services;
 
-import org.dmcs.transaction.analytics.olap.model.UserAccount;
-import org.dmcs.transaction.analytics.olap.repositories.AccountsRepository;
-import org.dmcs.transaction.analytics.olap.utils.Tuple;
+import org.dmcs.transaction.analytics.classical.model.UserAccount;
+import org.dmcs.transaction.analytics.classical.repositories.AccountsRepository;
+import org.dmcs.transaction.analytics.classical.utils.Tuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

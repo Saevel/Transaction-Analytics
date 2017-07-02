@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.olap.events;
+package org.dmcs.transaction.analytics.classical.events;
 
 import java.sql.Timestamp;
 
