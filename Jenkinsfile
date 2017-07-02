@@ -2,22 +2,34 @@ pipeline {
     agent any
 
     stages {
+        stage('Clean'){
+            steps {
+                bat 'gradlew.bat clean'
+            }
+        }
         stage('Build') {
             steps {
-                gradle 'clean build'
+                bat 'gradlew.bat build'
             }
         }
         stage('Test'){
             steps {
-                gradle 'test'
+                bat 'gradlew.bat test'
             }
         }
-        /*
-        stage('Deploy') {
+        stage('IntegrationTest'){
             steps {
-                sh 'make publish'
+                bat 'gradlew.bat it'
+            }
+        }
+        // TODO: Enable when ready
+        /*
+        stage('Dockerize') {
+            steps {
+                bat 'gradlew.bat dockerize'
             }
         }
         */
+        // TODO: Deploy using DCOS + Docker Repository
     }
 }
