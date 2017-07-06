@@ -32,7 +32,7 @@ trait UserAccountService {
   private[classical] def averageAccountBalanceByCountry(country: String)(implicit executionContext: ExecutionContext): Reader[UserAccountDao, Future[Double]] =
     Reader( dao =>
       dao.findByCountry(country).map( users =>
-        users.reduce((first, second) => (first.balance + second.balance) / users.length)
+        users.map(_.balance).reduce((first, second) => (first + second) / users.length)
       )
     )
 }

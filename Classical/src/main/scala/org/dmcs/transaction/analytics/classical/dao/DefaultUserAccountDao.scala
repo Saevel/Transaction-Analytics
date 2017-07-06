@@ -30,12 +30,19 @@ abstract class UserAccountDao extends DefaultUserAccountDao with RootConnector {
     select.where(_.country eqs country).fetch
 
   def findByCountryAndMinAge(country: String, minAge: Option[Int]): Future[List[UserAccount]] =
-    select.where(_.country eqs country).and(_.age >= minAge).fetch
+    select.where(_.country eqs country).fetch.map(accounts => accounts.filter(_.age.between(minAge, None)))
 
   def findByCountryAndMaxAge(country: String, maxAge: Option[Int]): Future[List[UserAccount]] =
-    select.where(_.country eqs country).and(_.age <= maxAge).fetch
+    select.where(_.country eqs country).fetch.map(accounts => accounts.filter(_.age.between(None, maxAge)))
 
   def findByCountryAndAgeInterval(country: String, minAge: Option[Int], maxAge: Option[Int]): Future[List[UserAccount]] =
-    select.where(_.country eqs country).and(_.age >= minAge).and(_.age <= maxAge).fetch
+    select.where(_.country eqs country).fetch.map(accounts => accounts.filter(_.age.between(minAge, maxAge)))
+
+  protected implicit class OptionalBoundedInt(option: Option[Int]) {
+
+    def between(min: Option[Int], max: Option[Int]): Boolean = option.fold(false){ value =>
+      min.fold(true)(minimum => value <= minimum) && max.fold(true)(maximum => value >= maximum)
+    }
+  }
 }
 

@@ -26,13 +26,13 @@ package object dao {
     val connector = ContactPoint.local.keySpace(%("cassandra.keyspace"))
   }
 
-  private class DataBase(val keyspace: KeySpaceDef) extends Database(keyspace) {
+  class DataBase(val keyspace: KeySpaceDef) extends Database[DataBase](keyspace) {
 
-    val defaultUserDataDao = new UserDataDao with keyspace.Connector
+    object defaultUserDataDao extends UserDataDao with keyspace.Connector
 
-    val defaultUserAccountDao = new UserAccountDao with keyspace.Connector
+    object defaultUserAccountDao extends UserAccountDao with keyspace.Connector
 
-    val defaultCashOperationsDao = new CashOperationsDao with keyspace.Connector
+    object defaultCashOperationsDao extends CashOperationsDao with keyspace.Connector
 
     //TODO: KEYSPACE?
     def create: Unit = {
@@ -44,5 +44,5 @@ package object dao {
     }
   }
 
-  private[classical] object DataAccessLayer extends DataBase(Defaults.connector)
+  object DataAccessLayer extends DataBase(Defaults.connector)
 }

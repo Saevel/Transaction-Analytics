@@ -22,14 +22,12 @@ pipeline {
                 bat 'gradlew.bat :Classical:it :Lambda:SpeedLayer:it :Lambda:BatchLayer:it'
             }
         }
-        // TODO: Enable when ready
-        /*
+
         stage('Dockerize') {
             steps {
                 bat 'gradlew.bat dockerize'
             }
         }
-        */
         // TODO: Deploy using DCOS + Docker Repository
     }
 }
