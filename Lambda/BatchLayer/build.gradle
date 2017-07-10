@@ -103,6 +103,7 @@ task prepareDockerBuild(type: Copy) {
 
 task dockerize(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
+    tags = ["transaction-analytics/batch-layer"] as Set<String>
 }
 
 // Task dependencies configuration

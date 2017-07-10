@@ -24,8 +24,6 @@ apply plugin: 'gradle-one-jar'
 
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
-
-
 repositories {
     mavenCentral()
     jcenter()
@@ -51,7 +49,7 @@ docker {
 }
 
 task fatJar(type: OneJar){
-    mainClass = 'org.dmcs.transaction.analytics.lambda.speed.layer.SpeedLayerApplication'
+    mainClass = 'org.dmcs.transaction.analyst.tests.app.TestsApplication'
 }
 
 /**
@@ -76,6 +74,7 @@ task prepareDockerBuild(type: Copy) {
 
 task dockerize(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
+    tags = ["transaction-analytics/tests"] as Set<String>
 }
 
 // Task dependencies configuration

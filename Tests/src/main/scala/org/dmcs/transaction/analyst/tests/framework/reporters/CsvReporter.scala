@@ -19,9 +19,10 @@ trait CsvReporter extends Reporter {
     try {
 
       if (reportOutput.exists) {
-        reportOutput.delete()
+        reportOutput.delete
       }
-      reportOutput.createNewFile()
+      reportOutput.getParentFile.mkdirs
+      reportOutput.createNewFile
       if (!reportOutput.isFile) {
         throw new IllegalArgumentException(s"${reportOutput.getPath} is not a file")
       }
@@ -29,7 +30,7 @@ trait CsvReporter extends Reporter {
       csvWriterOption = Option(reportOutput.asCsvWriter[TestResult](separator))
       csvWriterOption.foreach(f)
     } finally {
-      csvWriterOption.foreach(_.close())
+      csvWriterOption.foreach(_.close)
     }
   }
 

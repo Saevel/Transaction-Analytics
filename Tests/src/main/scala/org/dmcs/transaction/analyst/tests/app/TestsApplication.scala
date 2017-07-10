@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 /**
   * Created by Zielony on 2016-10-12.
   */
-object Main extends App with GeneratorFactory {
+object TestsApplication extends App with GeneratorFactory {
 
   implicit val timeout: FiniteDuration = 5 minutes
 

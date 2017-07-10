@@ -22,19 +22,18 @@ trait JsonLinesIngestor[T] extends Ingestor[T] {
     var writerOption: Option[PrintWriter] = None
     try {
       if (ingestionTargetFile.exists) {
-        ingestionTargetFile.delete()
+        ingestionTargetFile.delete
       }
-      ingestionTargetFile.createNewFile()
+      ingestionTargetFile.getParentFile.mkdirs
+      ingestionTargetFile.createNewFile
       if (!ingestionTargetFile.isFile) {
         throw new IllegalArgumentException(s"${ingestionTargetFile.getPath} is not a file")
       }
 
       writerOption = Option(new PrintWriter(new FileWriter(ingestionTargetFile)))
-      writerOption.foreach(writer =>
-        f(writer)
-      )
+      writerOption.foreach(writer => f(writer))
     } finally {
-      writerOption.foreach(_.close())
+      writerOption.foreach(_.close)
     }
   }
 }
