@@ -1,9 +1,30 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
 group 'org.dmcs'
+
 version '1.0'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.8'
+    }
+}
+
+project.ext.set("configs", "batch,spark,mds")
 
 apply plugin: 'scala'
 
-sourceCompatibility = 1.8
+apply plugin: 'gradle-one-jar'
+
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+
+
 
 repositories {
     mavenCentral()
@@ -23,3 +44,43 @@ dependencies {
     compile group: 'com.typesafe.play', name: 'play-json_2.11', version: '2.5.9'
     compile group: 'com.nrinaudo', name: 'kantan.csv_2.11', version: '0.1.15'
 }
+
+docker {
+    url='tcp://192.168.99.100:2376'
+    certPath = new File('C:\\Users\\kamil\\.docker\\machine\\machines\\default')
+}
+
+task fatJar(type: OneJar){
+    mainClass = 'org.dmcs.transaction.analytics.lambda.speed.layer.SpeedLayerApplication'
+}
+
+/**
+ * Copies config from the top-level project into this module.
+ */
+task getConfigs(type: Copy){
+    if(project.hasProperty('configs')){
+        configs.split(",").each{ config ->
+            from(rootProject.projectDir.getAbsolutePath() + "/src/main/resources/" + config + ".properties")
+            into(project.buildDir.getAbsolutePath() + "/resources/main")
+        }
+    }
+}
+
+task prepareDockerBuild(type: Copy) {
+    from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+
+    from(project.projectDir.getAbsolutePath() + "/src/main/docker")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+}
+
+task dockerize(type: DockerBuildImage){
+    inputDir = project.file(project.buildDir.path + "/docker")
+}
+
+// Task dependencies configuration
+dockerize.dependsOn fatJar
+dockerize.dependsOn prepareDockerBuild
+compileScala.dependsOn getConfigs
+fatJar.dependsOn build
+prepareDockerBuild.dependsOn fatJar

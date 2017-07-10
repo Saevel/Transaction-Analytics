@@ -33,3 +33,16 @@ docker {
 task sparkDocker(type: DockerBuildImage){
     inputDir = project.file(project.projectDir.path + "/src/main/docker")
 }
+
+import org.dmcs.transaction.analytics.DockerfileScout
+
+task dockerize {
+    DockerfileScout scout = new DockerfileScout()
+    project.subprojects.each{ subproject ->
+        if(scout.hasDockerDeployables(subproject.path)) {
+            subproject.tasks.each { task ->
+                subproject.tasks.findByName("dockerize").execute()
+            }
+        }
+    }
+}
