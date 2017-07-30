@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_MACHINE_URL = credentials('DOCKER_MACHINE_URL')
+        DOCKER_CERT_PATH = credentials('DOCKER_CERT_PATH')
+    }
+
     stages {
         stage('Clean'){
             steps {
