@@ -63,13 +63,10 @@ dependencies {
 
 // TODO: Get these from envs
 docker {
-    url='tcp://192.168.99.100:2376'
-    certPath = new File('C:\\Users\\kamil\\.docker\\machine\\machines\\default')
+    url=System.getenv('DOCKER_MACHINE_URL')
+    certPath=file(System.getenv('DOCKER_CERT_PATH'))
 }
 
-// TODO: Create a Docker task
-// TODO: Create Jenkins DSL scripts creating the build for this project.
-// TODO: Copy to all relevant projects
 // TODO: When possible, create and integrate DCOS deployment tasks
 
 task fatJar(type: OneJar){

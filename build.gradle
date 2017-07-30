@@ -24,10 +24,9 @@ dependencies {
     compile localGroovy()
 }
 
-// TODO: Get these from envs
 docker {
-    url='tcp://192.168.99.100:2376'
-    certPath = new File('C:\\Users\\kamil\\.docker\\machine\\machines\\default')
+    url=System.getenv('DOCKER_MACHINE_URL')
+    certPath=file(System.getenv('DOCKER_CERT_PATH'))
 }
 
 task sparkDocker(type: DockerBuildImage){
