@@ -22,6 +22,7 @@ apply plugin: 'groovy'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+cd C:/DCOS/dcos-vagrantimport com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 sourceCompatibility = 1.8
 
 repositories {
@@ -89,6 +90,14 @@ task dockerize(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
     tags = ["transaction-analytics/classical"] as Set<String>
 }
+
+/*
+task dockerPush(type: DockerPushImage){
+    imageName = 'transaction-analytics/classical'
+}
+
+dockerPush.dependsOn dockerize
+*/
 
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild

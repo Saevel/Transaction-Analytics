@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics;
+package org.dmcs.transaction.analytics.docker;
 
 import java.io.File;
 

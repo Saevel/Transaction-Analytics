@@ -18,8 +18,8 @@ apply plugin: 'com.bmuschko.docker-remote-api'
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
-// TODO: Probably remove these?
 dependencies {
+    // TODO: Do we need Gradle API as dependency?
     compile gradleApi()
     compile localGroovy()
 }
@@ -33,7 +33,7 @@ task sparkDocker(type: DockerBuildImage){
     inputDir = project.file(project.projectDir.path + "/src/main/docker")
 }
 
-import org.dmcs.transaction.analytics.DockerfileScout
+import org.dmcs.transaction.analytics.docker.DockerfileScout
 
 task dockerize {
     DockerfileScout scout = new DockerfileScout()
@@ -45,3 +45,5 @@ task dockerize {
         }
     }
 }
+
+// TODO: Tasks to deploy to Mesopshere Chronos (Batch Layer) and Marathon (Speed Layer, Classical, Tests) via REST API calls
