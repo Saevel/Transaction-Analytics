@@ -22,7 +22,7 @@ apply plugin: 'groovy'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-cd C:/DCOS/dcos-vagrantimport com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 sourceCompatibility = 1.8
 
 repositories {
@@ -44,6 +44,11 @@ sourceSets {
 configurations {
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
+}
+
+// TODO: Implement!
+task deployToMarathon {
+    println("DEPLOY CLASSICAL TO MARATHON!")
 }
 
 dependencies {

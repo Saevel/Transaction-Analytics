@@ -103,6 +103,11 @@ task dockerize(type: DockerBuildImage){
     tags = ["transaction-analytics/batch-layer"] as Set<String>
 }
 
+// TODO: Implement!
+task deployToChronos {
+    println("DEPLOY BATCH LAYER TO CHRONOS!")
+}
+
 // Task dependencies configuration
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild

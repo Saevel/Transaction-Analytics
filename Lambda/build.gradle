@@ -4,10 +4,14 @@ version '1.0'
 
 //TODO: OOZIE PROJECT + PROPAGATING PROPERTIES
 
+import org.dmcs.transaction.analytics.gradle.SubprojectTaskCall
+import org.dmcs.transaction.analytics.gradle.SubprojectTaskCall.*
+
+SubprojectTaskCall.callTaskIfExists(project, "xxx")
+
 task dockerize {
     logger.println("Dockerize all application counterparts")
 }
 
-dockerize.dependsOn(":Classical:dockerize")
 dockerize.dependsOn(":Lambda:BatchLayer:dockerize")
 dockerize.dependsOn(":Lambda:SpeedLayer:dockerize")

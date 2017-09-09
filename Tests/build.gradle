@@ -77,6 +77,11 @@ task dockerize(type: DockerBuildImage){
     tags = ["transaction-analytics/tests"] as Set<String>
 }
 
+// TODO: Implement!
+task deployToMarathon {
+    println "DEPLOY TESTS TO MARATHON"
+}
+
 // Task dependencies configuration
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild

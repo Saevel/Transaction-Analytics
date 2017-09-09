@@ -110,6 +110,11 @@ task dockerize(type: DockerBuildImage){
     tags = ["transaction-analytics/speed-layer"] as Set<String>
 }
 
+// TODO: Implement!
+task deployToMarathon {
+    println "DEPLOY SPEED LAYER TO MARATHON"
+}
+
 // Task dependencies configuration
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild
