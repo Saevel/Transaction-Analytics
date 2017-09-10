@@ -1,7 +1,8 @@
-package org.dmcs.transaction.analytics.mesosphere.marathon;
+package org.dmcs.transaction.analytics.mesosphere.marathon.containers;
 
 import org.dmcs.transaction.analytics.mesosphere.NetworkType;
 import org.dmcs.transaction.analytics.mesosphere.Parameter;
+import org.dmcs.transaction.analytics.mesosphere.marathon.PortMapping;
 
 import java.util.Collection;
 

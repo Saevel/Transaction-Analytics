@@ -23,6 +23,7 @@ apply plugin: 'gradle-one-jar'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import org.dmcs.transaction.analytics.mesosphere.MesosphereDeployment
 
 repositories {
     mavenCentral()
@@ -111,11 +112,13 @@ task dockerize(type: DockerBuildImage){
 }
 
 // TODO: Implement!
-task deployToMarathon {
-    println "DEPLOY SPEED LAYER TO MARATHON"
+task deploy {
+    logger.debug 'DCOS Deployment: Deploy SpeedLayer to Marathon'
+    // MesosphereDeployment.deployToMarathon("", null);
 }
 
 // Task dependencies configuration
+deploy.dependsOn dockerize
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild
 compileScala.dependsOn getConfigs

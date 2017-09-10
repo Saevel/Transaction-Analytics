@@ -1,4 +1,5 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import org.dmcs.transaction.analytics.mesosphere.MesosphereDeployment
 
 group 'org.dmcs'
 
@@ -78,11 +79,14 @@ task dockerize(type: DockerBuildImage){
 }
 
 // TODO: Implement!
-task deployToMarathon {
-    println "DEPLOY TESTS TO MARATHON"
+task deploy {
+    // String dcosUrl = System.getenv("DCOS_URL");
+    logger.debug "DCOS deployment: Deploying 'Tests' to Marathon"
+    // MesosphereDeployment.deployToChronos("http://localhost:8080", null)
 }
 
 // Task dependencies configuration
+deploy.dependsOn dockerize
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild
 compileScala.dependsOn getConfigs

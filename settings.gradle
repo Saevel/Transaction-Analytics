@@ -5,7 +5,6 @@ include 'Classical'
 include 'Tests'
 
 include 'Lambda:BatchLayer'
-include 'Lambda:Ingestion'
 include 'Lambda:SpeedLayer'
 include 'Events'
 include 'Model'

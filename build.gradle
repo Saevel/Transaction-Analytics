@@ -4,12 +4,12 @@ version '1.0'
 
 buildscript {
     repositories {
+        mavenCentral()
         jcenter()
     }
 
     dependencies {
         classpath 'com.bmuschko:gradle-docker-plugin:3.0.8'
-        classpath 'org.codehaus.groovy.modules.http-builder:http-builder:0.5.2'
     }
 }
 
@@ -18,19 +18,11 @@ apply plugin: 'groovy'
 apply plugin: 'com.bmuschko.docker-remote-api'
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-
-import groovyx.net.http.HTTPBuilder
-import groovyx.net.http.EncoderRegistry
 import org.dmcs.transaction.analytics.gradle.SubprojectTaskCall
-import org.dmcs.transaction.analytics.mesosphere.marathon.MarathonApplication
 
-import static groovyx.net.http.Method.*
-import static groovyx.net.http.ContentType.*
-
-dependencies {
-    // TODO: Do we need Gradle API as dependency?
-    compile gradleApi()
-    compile localGroovy()
+repositories {
+    mavenCentral()
+    jcenter()
 }
 
 docker {
@@ -42,57 +34,13 @@ task sparkDocker(type: DockerBuildImage){
     inputDir = project.file(project.projectDir.path + "/src/main/docker")
 }
 
-import org.dmcs.transaction.analytics.docker.DockerfileScout
 import org.dmcs.transaction.analytics.mesosphere.chronos.ChronosJob
 
-// TODO: Create a generic method to do this (call a task on each
-// subproject with given properties by name
-
 task dockerize {
-    DockerfileScout scout = new DockerfileScout()
-    project.subprojects.each{ subproject ->
-        if(scout.hasDockerDeployables(subproject.path)) {
-            subproject.tasks.each { task ->
-                subproject.tasks.findByName("dockerize").execute()
-            }
-        }
-    }
+    SubprojectTaskCall.callTaskIfExists(project, "dockerize")
 }
-
-import org.dmcs.transaction.analytics.gradle.SubprojectTaskCall.*
 
 task deploy {
-    SubprojectTaskCall.callTaskIfExists(project, "deployToChronos")
-    SubprojectTaskCall.callTaskIfExists(project, "deployToMarathon")
+    logger.debug "DCOS Deployment: Deploy all subprojects"
+    SubprojectTaskCall.callTaskIfExists(project, "deploy")
 }
-
-// TODO: Uncomment!
-// deploy.dependsOn dockerize
-
-task sampleRestCall {
-    // TODO: Why is this executed even on non-related task calls?
-    // deployViaRest("http://localhost:8080", null)
-}
-
-
-void deployViaRest(String url, Object job) {
-    def http = new HTTPBuilder(url)
-    // TODO: Consider automatic retries with exponential backoff
-    http.request(POST, JSON){request ->
-        body = job
-        response.success = { resp, reader ->
-            println("GOT SOME RESPONSE")
-            // TODO: Println some success message
-        }
-    }
-}
-
-void deployToChronos(String dcosUrl, ChronosJob job) {
-    deployViaRest(dcosUrl, job)
-}
-
-void deployToMarathon(String dcosUrl, MarathonApplication application){
-    deployViaRest(dcosUrl, MarathonApplication)
-}
-
-// TODO: Tasks to deploy to Mesopshere Chronos (Batch Layer) and Marathon (Speed Layer, Classical, Tests) via REST API calls

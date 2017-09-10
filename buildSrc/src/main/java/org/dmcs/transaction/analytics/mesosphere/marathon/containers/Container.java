@@ -1,4 +1,4 @@
-package org.dmcs.transaction.analytics.mesosphere.marathon;
+package org.dmcs.transaction.analytics.mesosphere.marathon.containers;
 
 import org.dmcs.transaction.analytics.mesosphere.ContainerType;
 import org.dmcs.transaction.analytics.mesosphere.PersistentVolume;

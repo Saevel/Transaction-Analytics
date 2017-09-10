@@ -1,5 +1,4 @@
 rootProject.name = 'Lambda'
-include 'Ingestion'
 include 'BatchLayer'
 include 'SpeedLayer'
 include 'Events'

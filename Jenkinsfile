@@ -33,6 +33,11 @@ pipeline {
                 bat 'gradlew.bat dockerize'
             }
         }
-        // TODO: Deploy using DCOS + Docker Repository
+
+        stage('Deploy') {
+            steps {
+                bat 'gradlew.bat deploy'
+            }
+        }
     }
 }

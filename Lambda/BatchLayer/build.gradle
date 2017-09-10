@@ -23,6 +23,7 @@ apply plugin: 'gradle-one-jar'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import org.dmcs.transaction.analytics.mesosphere.MesosphereDeployment
 
 repositories {
     mavenCentral()
@@ -104,11 +105,15 @@ task dockerize(type: DockerBuildImage){
 }
 
 // TODO: Implement!
-task deployToChronos {
-    println("DEPLOY BATCH LAYER TO CHRONOS!")
+task deploy {
+    logger.debug "DCOS Deployment: Deploy BatchLayer to Chronos"
+    // String chronosUrl = System.getenv("DCOS_URL") + "/chronos"
+    // TODO: Chronos job
+    // MesosphereDeployment.deployToChronos(chronosUrl, null)
 }
 
 // Task dependencies configuration
+deploy.dependsOn dockerize
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild
 compileScala.dependsOn getConfigs
