@@ -44,6 +44,7 @@ task dockerize {
     SubprojectTaskCall.callTaskIfExists(project, "dockerize")
 }
 
+// TODO: Deploy TESTS last
 task deploy {
     logger.debug "DCOS Deployment: Deploy all subprojects"
     SubprojectTaskCall.callTaskIfExists(project, "deploy")
