@@ -30,6 +30,10 @@ docker {
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
 }
 
+task it {
+    SubprojectTaskCall.callTaskIfExists(project, 'it')
+}
+
 task sparkDocker(type: DockerBuildImage){
     inputDir = project.file(project.projectDir.path + "/src/main/docker")
 }

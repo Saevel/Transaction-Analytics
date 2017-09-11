@@ -12,3 +12,7 @@ task deploy {
 task dockerize {
     SubprojectTaskCall.callTaskIfExists(project, "dockerize")
 }
+
+task it {
+    SubprojectTaskCall.callTaskIfExists(project, "it")
+}
