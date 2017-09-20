@@ -2,7 +2,44 @@ group 'org.dmcs'
 
 version '1.0'
 
-//TODO: OOZIE PROJECT + PROPAGATING PROPERTIES
+apply plugin: 'scala'
+
+configurations {
+    acceptanceTestCompile.extendsFrom compile
+    acceptanceTestRuntime.extendsFrom runtime
+}
+
+sourceSets {
+    acceptanceTests {
+        java {
+            compileClasspath += main.output + configurations.acceptanceTestCompile
+            runtimeClasspath += main.output + configurations.acceptanceTestRuntime
+            srcDir file('src/acceptance/scala')
+        }
+        resources.srcDir file('src/acceptance/resources')
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    acceptanceTestCompile project(':TestFramework')
+}
+
+task acceptanceTestCompile(type: ScalaCompile) {
+    source = fileTree(dir: 'src/acceptance/scala', include: '**/*.scala')
+    destinationDir = file('build/classes/acceptance')
+    // sourceCompatibility = '1.7'
+    // targetCompatibility = '1.7'
+    classpath = sourceSets.acceptanceTests.runtimeClasspath
+    scalaCompileOptions.incrementalOptions.analysisFile = new File("${buildDir}/tmp/scala/compilerAnalysis/compileCustomScala.analysis")
+}
+
+acceptanceTestCompile.dependsOn(compileScala)
 
 task dockerize {
     logger.println("Dockerize all application counterparts")
