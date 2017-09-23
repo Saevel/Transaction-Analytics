@@ -34,8 +34,8 @@ configurations {
     integrationTestCompile.extendsFrom testCompile
     integrationTestRuntime.extendsFrom testRuntime
 
-    acceptanceTestCompile.extendsFrom compile
-    acceptanceTestRuntime.extendsFrom runtime
+    acceptanceTestCompile{} extendsFrom compile
+    acceptanceTestRuntime{} extendsFrom runtime
 }
 
 sourceSets {
@@ -77,7 +77,6 @@ dependencies {
     acceptanceTestCompile project(':TestFramework')
 }
 
-// TODO: Get these from envs
 docker {
     url=System.getenv('DOCKER_MACHINE_URL')
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
@@ -93,36 +92,55 @@ task it(type: Test) {
     outputs.upToDateWhen { false }
 }
 
-
 task acceptanceTestCompile(type: ScalaCompile) {
     source = fileTree(dir: 'src/acceptance/scala', include: '**/*.scala')
     destinationDir = file('build/classes/acceptance')
-    // sourceCompatibility = '1.7'
-    // targetCompatibility = '1.7'
-    classpath = sourceSets.acceptanceTests.runtimeClasspath // files('build/classes/acceptance')
+    classpath = sourceSets.acceptanceTests.runtimeClasspath
     scalaCompileOptions.incrementalOptions.analysisFile = new File("${buildDir}/tmp/scala/compilerAnalysis/compileCustomScala.analysis")
 }
 
+task acceptanceTestBaseJar(type: Jar){
+    archiveName = 'Classical-Acceptance-Tests-partial.jar'
+    manifest {
+        attributes(
+            'Main-Class':'org.dmcs.transaction.analytics.classical.AcceptanceTestsApplication',
+            'Class-Path': configurations.acceptanceTestCompile.files.collect {"$it.name"}.join(' ')
+        )
+    }
+    from 'build/classes/acceptance'
+}
+
 task acceptanceTestJar(type: OneJar) {
-
+    mainClass = 'org.dmcs.transaction.analytics.classical.AcceptanceTestsApplication'
+    baseJar = acceptanceTestBaseJar
+    archiveName = 'Classical-Acceptance-Tests.jar'
 }
 
-// TODO: Implement
-/*
+acceptanceTestJar.dependsOn(acceptanceTestBaseJar)
+
+task prepareAcceptanceTestDockerBuild(type: Copy) {
+    from(project.buildDir.getAbsolutePath() + "/libs/Classical-Acceptance-Tests.jar")
+    into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
+
+    from(project.projectDir.getAbsolutePath() + "/src/acceptance/docker")
+    into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
+}
+
 task acceptanceTestDockerize(type: DockerBuildImage) {
-
+    inputDir = project.file(project.buildDir.path + "/acceptance/docker")
+    tags = ["transaction-analytics/classical-acceptance-tests"] as Set<String>
 }
-*/
 
 // TODO: Implement
 /*
 task acceptanceTest {
-    
+    // TODO: Deploy acceptance tests to Maraton.
 }
 */
 
-acceptanceTestCompile.dependsOn(compileScala)
-
+acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
+prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
+acceptanceTestDockerize.dependsOn(prepareAcceptanceTestDockerBuild)
 
 task prepareDockerBuild(type: Copy) {
     from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")

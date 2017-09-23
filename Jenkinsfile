@@ -33,6 +33,13 @@ pipeline {
                 bat 'gradlew.bat dockerize'
             }
         }
+
+        // TODO: Actual acceptance tests call
+        stage('Acceptance Tests: Classical') {
+            steps {
+                bat 'gradlew.bat :Classical:acceptanceTestDockerize'
+            }
+        }
         // TODO: Deploy using DCOS + Docker Repository
     }
 }

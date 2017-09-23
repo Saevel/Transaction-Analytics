@@ -6,5 +6,5 @@ package org.dmcs.transaction.analytics.classical
 
 object AcceptanceTestsApplication extends App {
 
-  println("TODO")
+  println("TODO: Acceptance Tests for the Classical project!")
 }
