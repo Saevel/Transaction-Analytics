@@ -1,4 +1,5 @@
 group 'org.dmcs'
+
 version '1.0'
 
 buildscript {
@@ -103,7 +104,7 @@ task acceptanceTestBaseJar(type: Jar){
     archiveName = 'Classical-Acceptance-Tests-partial.jar'
     manifest {
         attributes(
-            'Main-Class':'org.dmcs.transaction.analytics.classical.AcceptanceTestsApplication',
+            'Main-Class':'org.dmcs.transaction.analytics.classical.ClassicalAcceptanceTestsApplication',
             'Class-Path': configurations.acceptanceTestCompile.files.collect {"$it.name"}.join(' ')
         )
     }
@@ -111,7 +112,7 @@ task acceptanceTestBaseJar(type: Jar){
 }
 
 task acceptanceTestJar(type: OneJar) {
-    mainClass = 'org.dmcs.transaction.analytics.classical.AcceptanceTestsApplication'
+    mainClass = 'org.dmcs.transaction.analytics.classical.ClassicalAcceptanceTestsApplication'
     baseJar = acceptanceTestBaseJar
     archiveName = 'Classical-Acceptance-Tests.jar'
 }
