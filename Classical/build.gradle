@@ -141,11 +141,11 @@ task acceptanceTestDockerize(type: DockerBuildImage) {
 }
 
 // TODO: Implement
-/*
+
 task acceptanceTest {
     // TODO: Deploy acceptance tests to Maraton.
+    logger.info("Acceptance Tests for the Classical project")
 }
-*/
 
 acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
 prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
@@ -172,6 +172,7 @@ task dockerPush(type: DockerPushImage){
 dockerPush.dependsOn dockerize
 */
 
+acceptanceTest.dependsOn deploy
 deploy.dependsOn dockerize
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild

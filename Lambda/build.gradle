@@ -95,23 +95,19 @@ task acceptanceTestDockerize(type: DockerBuildImage) {
 }
 
 // TODO: Implement
-/*
 task acceptanceTest {
+    logger.info("Acceptance Tests for the Lambda project")
     // TODO: Deploy acceptance tests to Maraton.
 }
-*/
 
 acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
 prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
 acceptanceTestDockerize.dependsOn(prepareAcceptanceTestDockerBuild)
 
-
 task deploy {
     logger.debug "DCOS Deployment: deploy all Lambda subprojects"
     SubprojectTaskCall.callTaskIfExists(project, "deploy")
 }
-
-
 
 task dockerize {
     SubprojectTaskCall.callTaskIfExists(project, "dockerize")
@@ -120,3 +116,6 @@ task dockerize {
 task it {
     SubprojectTaskCall.callTaskIfExists(project, "it")
 }
+
+acceptanceTest.dependsOn deploy
+deploy.dependsOn dockerize
