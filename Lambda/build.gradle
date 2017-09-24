@@ -21,6 +21,7 @@ apply plugin: 'gradle-one-jar'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
 configurations {
     acceptanceTestCompile{} extendsFrom compile
