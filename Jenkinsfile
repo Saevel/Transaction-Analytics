@@ -34,6 +34,22 @@ pipeline {
             }
         }
 
+        // TODO: Actual acceptance tests call
+        stage('Acceptance Tests: Classical') {
+            steps {
+                bat 'gradlew.bat :Classical:acceptanceTestDockerize'
+            }
+        }
+
+        // TODO: Actual acceptance tests call
+        stage('Acceptance Tests: Lambda') {
+            steps {
+                bat 'gradlew.bat :Lambda:acceptanceTestDockerize'
+            }
+        }
+
+        // TODO: Deploy using DCOS + Docker Repository
+
         stage('Deploy') {
             steps {
                 bat 'gradlew.bat deploy'

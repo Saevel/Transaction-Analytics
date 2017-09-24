@@ -4,10 +4,114 @@ group 'org.dmcs'
 
 version '1.0'
 
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.8'
+    }
+}
+
+apply plugin: 'scala'
+
+apply plugin: 'gradle-one-jar'
+
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+configurations {
+    acceptanceTestCompile{} extendsFrom compile
+    acceptanceTestRuntime{} extendsFrom runtime
+}
+
+sourceSets {
+    acceptanceTests {
+        java {
+            compileClasspath += main.output + configurations.acceptanceTestCompile
+            runtimeClasspath += main.output + configurations.acceptanceTestRuntime
+            srcDir file('src/acceptance/scala')
+        }
+        resources.srcDir file('src/acceptance/resources')
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    acceptanceTestCompile project(':TestFramework')
+}
+
+docker {
+    url=System.getenv('DOCKER_MACHINE_URL')
+    certPath=file(System.getenv('DOCKER_CERT_PATH'))
+}
+
+task acceptanceTestCompile(type: ScalaCompile) {
+    source = fileTree(dir: 'src/acceptance/scala', include: '**/*.scala')
+    destinationDir = file('build/classes/acceptance')
+    classpath = sourceSets.acceptanceTests.runtimeClasspath
+    scalaCompileOptions.incrementalOptions.analysisFile = new File("${buildDir}/tmp/scala/compilerAnalysis/compileCustomScala.analysis")
+}
+
+task acceptanceTestBaseJar(type: Jar){
+    archiveName = 'Lambda-Acceptance-Tests-partial.jar'
+    manifest {
+        attributes(
+                'Main-Class':'org.dmcs.transaction.analytics.lambda.LambdaAcceptanceTestsApplication',
+                'Class-Path': configurations.acceptanceTestCompile.files.collect {"$it.name"}.join(' ')
+        )
+    }
+    from 'build/classes/acceptance'
+}
+
+task acceptanceTestJar(type: OneJar) {
+    mainClass = 'org.dmcs.transaction.analytics.lambda.LambdaAcceptanceTestsApplication'
+    baseJar = acceptanceTestBaseJar
+    archiveName = 'Lambda-Acceptance-Tests.jar'
+}
+
+acceptanceTestJar.dependsOn(acceptanceTestBaseJar)
+
+task prepareAcceptanceTestDockerBuild(type: Copy) {
+    from(project.buildDir.getAbsolutePath() + "/libs/Lambda-Acceptance-Tests.jar")
+    into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
+
+    from(project.projectDir.getAbsolutePath() + "/src/acceptance/docker")
+    into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
+}
+
+task acceptanceTestDockerize(type: DockerBuildImage) {
+    inputDir = project.file(project.buildDir.path + "/acceptance/docker")
+    tags = ["transaction-analytics/lambda-acceptance-tests"] as Set<String>
+}
+
+// TODO: Implement
+/*
+task acceptanceTest {
+    // TODO: Deploy acceptance tests to Maraton.
+}
+*/
+
+acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
+prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
+acceptanceTestDockerize.dependsOn(prepareAcceptanceTestDockerBuild)
+
+
 task deploy {
     logger.debug "DCOS Deployment: deploy all Lambda subprojects"
     SubprojectTaskCall.callTaskIfExists(project, "deploy")
 }
+
+
 
 task dockerize {
     SubprojectTaskCall.callTaskIfExists(project, "dockerize")
