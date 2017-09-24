@@ -7,30 +7,34 @@ pipeline {
     }
 
     stages {
-        stage('Clean'){
+
+        stage('Clean') {
             steps {
                 bat 'gradlew.bat clean'
             }
         }
+
         stage('Build') {
             steps {
                 bat 'gradlew.bat build'
             }
         }
-        stage('Test'){
+
+        stage('Test') {
             steps {
                 bat 'gradlew.bat test'
             }
         }
-        stage('IntegrationTest'){
+
+        stage('IntegrationTest') {
             steps {
                 bat 'gradlew.bat :Classical:it :Lambda:SpeedLayer:it :Lambda:BatchLayer:it'
             }
         }
 
-        stage('Dockerize') {
+        stage('Deploy') {
             steps {
-                bat 'gradlew.bat dockerize'
+                bat 'gradlew.bat deploy'
             }
         }
 

@@ -23,6 +23,7 @@ apply plugin: 'gradle-one-jar'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
 repositories {
     mavenCentral()
@@ -110,7 +111,17 @@ task dockerize(type: DockerBuildImage){
     tags = ["transaction-analytics/speed-layer"] as Set<String>
 }
 
+task dockerPush(type: DockerPushImage){
+    imageName = 'transaction-analytics/speed-layer'
+}
+
+task deploy {
+    logger.info("TODO: Deployment for the SpeedLayer project")
+}
+
 // Task dependencies configuration
+deploy.dependsOn dockerPush
+dockerPush.dependsOn dockerize
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild
 compileScala.dependsOn getConfigs

@@ -92,21 +92,38 @@ task acceptanceTestDockerize(type: DockerBuildImage) {
     tags = ["transaction-analytics/lambda-acceptance-tests"] as Set<String>
 }
 
-// TODO: Implement
-/*
-task acceptanceTest {
-    // TODO: Deploy acceptance tests to Maraton.
+task acceptanceTestDockerPush(type: DockerPushImage) {
+    imageName = "transaction-analytics/lambda-acceptance-tests"
 }
-*/
+
+// TODO: Implement
+task acceptanceTest {
+    logger.info("Acceptance Tests for the Lambda Project")
+}
 
 acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
 prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
 acceptanceTestDockerize.dependsOn(prepareAcceptanceTestDockerBuild)
 
 task dockerize {
-    logger.println("Dockerize all application counterparts")
+    logger.info("Dockerize all application counterparts")
 }
 
-dockerize.dependsOn(":Classical:dockerize")
+task dockerPush {
+    logger.info("Lambda: docker push images")
+}
+
+task deploy {
+    logger.info("TODO: Deployment for the Lambda Project")
+}
+
+acceptanceTest.dependsOn(deploy)
+
+deploy.dependsOn(":Lambda:BatchLayer:deploy")
+deploy.dependsOn(":Lambda:SpeedLayer:deploy")
+
+dockerPush.dependsOn(":Lambda:BatchLayer:dockerPush")
+dockerPush.dependsOn(":Lambda:SpeedLayer:dockerPush")
+
 dockerize.dependsOn(":Lambda:BatchLayer:dockerize")
 dockerize.dependsOn(":Lambda:SpeedLayer:dockerize")

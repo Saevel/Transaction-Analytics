@@ -23,6 +23,7 @@ apply plugin: 'groovy'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
 sourceCompatibility = 1.8
 
@@ -132,16 +133,20 @@ task acceptanceTestDockerize(type: DockerBuildImage) {
     tags = ["transaction-analytics/classical-acceptance-tests"] as Set<String>
 }
 
-// TODO: Implement
-/*
-task acceptanceTest {
-    // TODO: Deploy acceptance tests to Maraton.
+task acceptanceTestDockerPush(type: DockerPushImage) {
+    imageName = 'transaction-analytics/classical-acceptance-tests'
 }
-*/
+
+// TODO: Implement
+task acceptanceTest {
+    logger.info("TODO: Acceptance Tests for the Classical Application")
+}
 
 acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
 prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
 acceptanceTestDockerize.dependsOn(prepareAcceptanceTestDockerBuild)
+acceptanceTestDockerPush.dependsOn(acceptanceTestDockerize)
+acceptanceTest.dependsOn(acceptanceTestDockerPush)
 
 task prepareDockerBuild(type: Copy) {
     from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
@@ -156,9 +161,22 @@ task dockerize(type: DockerBuildImage){
     tags = ["transaction-analytics/classical"] as Set<String>
 }
 
+task dockerPush(type: DockerPushImage){
+    imageName = 'transaction-analytics/classical'
+}
+
+task deploy {
+    logger.info("TODO: Deployment for the Classical Project")
+}
+
+acceptanceTest.dependsOn(deploy)
+deploy.dependsOn dockerPush
+dockerPush.dependsOn dockerize
 dockerize.dependsOn fatJar
 dockerize.dependsOn prepareDockerBuild
 fatJar.dependsOn build
 prepareDockerBuild.dependsOn fatJar
 check.dependsOn it
 it.mustRunAfter test
+
+acceptanceTest.dependsOn deploy
