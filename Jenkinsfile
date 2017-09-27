@@ -4,6 +4,10 @@ pipeline {
     environment {
         DOCKER_MACHINE_URL = credentials('DOCKER_MACHINE_URL')
         DOCKER_CERT_PATH = credentials('DOCKER_CERT_PATH')
+        DOCKER_USERNAME = credentials('DOCKER_USERNAME')
+        DOCKER_REGISTRY_URL = credentials('DOCKER_REGISTRY_URL')
+        DOCKER_USER_EMAIL = credentials('DOCKER_USER_EMAIL')
+        DOCKER_PASSWORD = credentials('DOCKER_PASSWORD')
     }
 
     stages {
@@ -34,25 +38,21 @@ pipeline {
             }
         }
 
-        // TODO: Actual acceptance tests call
+        stage('Deploy') {
+            steps {
+                bat 'gradlew.bat deploy'
+            }
+        }
+
         stage('Acceptance Tests: Classical') {
             steps {
                 bat 'gradlew.bat :Classical:acceptanceTestDockerize'
             }
         }
 
-        // TODO: Actual acceptance tests call
         stage('Acceptance Tests: Lambda') {
             steps {
                 bat 'gradlew.bat :Lambda:acceptanceTestDockerize'
-            }
-        }
-
-        // TODO: Deploy using DCOS + Docker Repository
-
-        stage('Deploy') {
-            steps {
-                bat 'gradlew.bat deploy'
             }
         }
     }

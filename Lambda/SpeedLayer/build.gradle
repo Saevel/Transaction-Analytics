@@ -23,6 +23,7 @@ apply plugin: 'gradle-one-jar'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 import org.dmcs.transaction.analytics.mesosphere.MesosphereDeployment
 
 repositories {
@@ -106,9 +107,13 @@ task prepareDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/docker")
 }
 
-task dockerize(type: DockerBuildImage){
+task dockerBuild(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
-    tags = ["transaction-analytics/speed-layer"] as Set<String>
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
+}
+
+task dockerize(type: DockerPushImage){
+    imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
 }
 
 // TODO: Implement!
@@ -119,10 +124,10 @@ task deploy {
 
 // Task dependencies configuration
 deploy.dependsOn dockerize
-dockerize.dependsOn fatJar
-dockerize.dependsOn prepareDockerBuild
-compileScala.dependsOn getConfigs
-fatJar.dependsOn build
+dockerize.dependsOn dockerBuild
+dockerBuild.dependsOn prepareDockerBuild
 prepareDockerBuild.dependsOn fatJar
+fatJar.dependsOn build
+compileScala.dependsOn getConfigs
 check.dependsOn it
 it.mustRunAfter test

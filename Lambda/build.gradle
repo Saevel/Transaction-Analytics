@@ -23,6 +23,7 @@ apply plugin: 'gradle-one-jar'
 apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
 configurations {
     acceptanceTestCompile{} extendsFrom compile
@@ -53,6 +54,13 @@ dependencies {
 docker {
     url=System.getenv('DOCKER_MACHINE_URL')
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
+
+    registryCredentials {
+        url = System.getenv("DOCKER_REGISTRY_URL")
+        username = System.getenv("DOCKER_USERNAME")
+        password = System.getenv("DOCKER_PASSWORD")
+        email = System.getenv("DOCKER_USER_EMAIL")
+    }
 }
 
 task acceptanceTestCompile(type: ScalaCompile) {
@@ -79,8 +87,6 @@ task acceptanceTestJar(type: OneJar) {
     archiveName = 'Lambda-Acceptance-Tests.jar'
 }
 
-acceptanceTestJar.dependsOn(acceptanceTestBaseJar)
-
 task prepareAcceptanceTestDockerBuild(type: Copy) {
     from(project.buildDir.getAbsolutePath() + "/libs/Lambda-Acceptance-Tests.jar")
     into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
@@ -89,9 +95,13 @@ task prepareAcceptanceTestDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
 }
 
-task acceptanceTestDockerize(type: DockerBuildImage) {
+task buildAcceptanceTestDocker(type: DockerBuildImage) {
     inputDir = project.file(project.buildDir.path + "/acceptance/docker")
-    tags = ["transaction-analytics/lambda-acceptance-tests"] as Set<String>
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-acceptance-tests"
+}
+
+task acceptanceTestDockerize(type: DockerPushImage) {
+    imageName = System.getenv("DOCKER_USERNAME") + '/transaction-analytics-lambda-acceptance-tests'
 }
 
 // TODO: Implement
@@ -101,8 +111,11 @@ task acceptanceTest {
 }
 
 acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
+acceptanceTestJar.dependsOn(acceptanceTestBaseJar)
 prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
-acceptanceTestDockerize.dependsOn(prepareAcceptanceTestDockerBuild)
+buildAcceptanceTestDocker.dependsOn(prepareAcceptanceTestDockerBuild)
+acceptanceTestDockerize.dependsOn(buildAcceptanceTestDocker)
+acceptanceTest.dependsOn(acceptanceTestDockerize)
 
 task deploy {
     logger.debug "DCOS Deployment: deploy all Lambda subprojects"
@@ -117,5 +130,4 @@ task it {
     SubprojectTaskCall.callTaskIfExists(project, "it")
 }
 
-acceptanceTest.dependsOn deploy
-deploy.dependsOn dockerize
+acceptanceTest.dependsOn(deploy)
