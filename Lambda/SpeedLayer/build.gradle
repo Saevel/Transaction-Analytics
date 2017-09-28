@@ -72,6 +72,13 @@ dependencies {
 docker {
     url=System.getenv('DOCKER_MACHINE_URL')
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
+
+    registryCredentials {
+        url = System.getenv("DOCKER_REGISTRY_URL")
+        username = System.getenv("DOCKER_USERNAME")
+        password = System.getenv("DOCKER_PASSWORD")
+        email = System.getenv("DOCKER_USER_EMAIL")
+    }
 }
 
 task fatJar(type: OneJar){
@@ -109,11 +116,11 @@ task prepareDockerBuild(type: Copy) {
 
 task dockerBuild(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
-    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
+    tag = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
 }
 
 task dockerize(type: DockerPushImage){
-    imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
+    imageName = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
 }
 
 // TODO: Implement!

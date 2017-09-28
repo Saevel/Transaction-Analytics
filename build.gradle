@@ -34,10 +34,6 @@ task it {
     SubprojectTaskCall.callTaskIfExists(project, 'it')
 }
 
-task sparkDocker(type: DockerBuildImage){
-    inputDir = project.file(project.projectDir.path + "/src/main/docker")
-}
-
 import org.dmcs.transaction.analytics.mesosphere.chronos.ChronosJob
 
 task dockerize {
