@@ -2,16 +2,16 @@ package org.dmcs.transaction.analytics.tests.framework.model
 
 import scala.util.Failure
 
-trait TestResult[X, Y] {
+trait TestResult[X] {
 
   val data: Traversable[X]
 }
 
-case class TestSuccess[X, Y](data: Traversable[X], actual: Y, expected: Y) extends TestResult[X, Y];
+case class TestSuccess[X, Y](data: Traversable[X], actual: Y, expected: Y) extends TestResult[X];
 
-case class TestError[X, Y](data: Traversable[X], message: String, cause: Throwable) extends TestResult[X, Y];
+case class TestError[X, Y](data: Traversable[X], message: String, cause: Throwable) extends TestResult[X];
 
-case class TestFailure[X, Y](data: Traversable[X], actual: Y, expected: Y) extends TestResult[X, Y];
+case class TestFailure[X, Y](data: Traversable[X], actual: Y, expected: Y) extends TestResult[X];
 
 object TestError {
 

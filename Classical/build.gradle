@@ -65,9 +65,9 @@ sourceSets {
 
 
 task deploy {
-    /*
     String marathonUrl = System.getenv("DCOS_URL") + "/service/marathon-user";
     // TODO: Marathon Application!
+    /*
     MesosphereDeployment.deployToMarathon(marathonUrl, new MarathonApplication(
        "Classical", "java -jar /usr/src/Classical-1.0-standalone.jar", "0.5", "256",
             Arrays.asList(new PortDefinition(8080, "http", "http", null)), true, 1,
@@ -162,7 +162,14 @@ task acceptanceTestDockerize(type: DockerPushImage) {
 // TODO: Implement
 task acceptanceTest {
     // TODO: Deploy acceptance tests to Maraton.
+    // String marathonUrl = System.getenv("DCOS_URL") + "/service/marathon-user";
     logger.info("Acceptance Tests for the Classical project")
+    /*
+    MesosphereDeployment.deployToMarathon(marathonUrl, new MarathonApplication(
+            "Classical", "java -jar /usr/src/Classical-1.0-standalone.jar", "0.5", "256",
+            Arrays.asList(new PortDefinition(8080, "http", "http", null)), true, 1,
+    ))
+    */
 }
 
 acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)

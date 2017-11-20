@@ -120,7 +120,7 @@ task dockerize(type: DockerPushImage){
 task deploy {
     logger.debug "DCOS Deployment: Deploy BatchLayer to Chronos"
     /*
-    MesosphereDeployment.deployToChronos(System.getenv("DCOS_URL") + "/chronos",
+    MesosphereDeployment.deployToChronos(System.getenv("DCOS_URL"),
             new ChronosJob("BatchLayer",
                 "java -jar -Xmx8g /usr/src/BatchLayer-1.0-standalone.jar",
                 "PT3M",

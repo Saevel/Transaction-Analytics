@@ -6,5 +6,5 @@ import scala.concurrent.Future
 
 trait Reporter{
 
-  protected def report(tests: Traversable[TestResult[_, _]]): Future[_]
+  protected def report[X](tests: Traversable[TestResult[X]]): Future[_]
 }
