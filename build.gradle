@@ -60,12 +60,12 @@ dockerize.dependsOn(':Classical:dockerize')
 dockerize.dependsOn(':Lambda:dockerize')
 
 // TODO: Fix the dependency problem
-task generateDeploymentDescriptor {
+task generateDeploymentDescriptor(dependsOn: dockerize) {
     // TODO: Read the scale parameter + app type ?
     // TODO: User SwarmDeployment to generate the proper descriptor.
 }
 
-task deploy(type: Exec) {
+task deploy(type: Exec, dependsOn: generateDeploymentDescriptor) {
     commandLine 'docker stack deploy -c stack.yml TransactionAnalytics'.tokenize()
 }
 
@@ -84,9 +84,6 @@ task generateSampleStack {
     ));
 }
 
-// TODO: Fix dependencies later.
-/*
 deploy.dependsOn ':Classical:deploy'
 deploy.dependsOn ':Lambda:deploy'
 deploy.dependsOn dockerize
-*/
