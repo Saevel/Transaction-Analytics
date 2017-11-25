@@ -1,0 +1,34 @@
+version: '3'
+
+networks:
+    hdfs-network:
+        driver: overlay
+
+services:
+  namenode:
+    image: sfedyakov/hadoop-271-cluster 
+    # container_name: namenode
+    hostname: namenode
+    # domainname: appnet
+    ports:
+      - "8088:8088"
+      - "50090:50090"
+      - "19888:19888"
+    command: "/etc/bootstrap.sh -d -namenode"
+    deploy:
+        restart_policy:
+            condition: on-failure
+    networks:
+    - hdfs-network
+            
+  datanode:
+    #depends_on:
+    #  - namenode
+    image: sfedyakov/hadoop-271-cluster
+    command: "/etc/bootstrap.sh -d -datanode"
+    deploy:
+        replicas: 3
+        restart_policy:
+            condition: on-failure
+    networks:
+    - hdfs-network
