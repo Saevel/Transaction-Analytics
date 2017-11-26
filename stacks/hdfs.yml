@@ -6,10 +6,8 @@ networks:
 
 services:
   namenode:
-    image: sfedyakov/hadoop-271-cluster 
-    # container_name: namenode
+    image: sfedyakov/hadoop-271-cluster
     hostname: namenode
-    # domainname: appnet
     ports:
       - "8088:8088"
       - "50090:50090"
@@ -22,8 +20,8 @@ services:
     - hdfs-network
             
   datanode:
-    #depends_on:
-    #  - namenode
+    depends_on:
+    - namenode
     image: sfedyakov/hadoop-271-cluster
     command: "/etc/bootstrap.sh -d -datanode"
     deploy:
