@@ -22,7 +22,7 @@ abstract class Test[DataType, StatisticType, Sink <: SinkType, FormatDataType, F
 
   protected def test(data: Traversable[DataType]): Future[StatisticType]
 
-  def run(implicit context: ExecutionContext): Stream[TestResult[DataType, StatisticType]] = {
+  def run(implicit context: ExecutionContext): Stream[TestResult[DataType]] = {
 
     val iterationData = Stream.fill(iterations)(Stream.fill(maxSize)(generate).filter(_.isSuccess).map(_.get))
 

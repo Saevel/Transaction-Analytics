@@ -1,4 +1,5 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 import org.dmcs.transaction.analytics.mesosphere.MesosphereDeployment
 
 group 'org.dmcs'
@@ -78,10 +79,15 @@ task prepareDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/docker")
 }
 
-task dockerize(type: DockerBuildImage){
+task dockerBuild(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
-    tags = ["transaction-analytics/tests"] as Set<String>
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-tests"
 }
+
+task dockerize(type: DockerPushImage){
+    imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-tests"
+}
+
 
 // TODO: Implement!
 task deploy {
@@ -93,7 +99,8 @@ task deploy {
 // Task dependencies configuration
 deploy.dependsOn dockerize
 dockerize.dependsOn fatJar
-dockerize.dependsOn prepareDockerBuild
+dockerize.dependsOn dockerBuild
+dockerBuild.dependsOn prepareDockerBuild
 compileScala.dependsOn getConfigs
 fatJar.dependsOn build
 prepareDockerBuild.dependsOn fatJar

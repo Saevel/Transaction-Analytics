@@ -5,6 +5,5 @@ import org.dmcs.transaction.analytics.tests.framework.model.TestResult
 import scala.concurrent.Future
 
 trait IdleReporter extends Reporter {
-
-  override protected def report(tests: Traversable[TestResult[_, _]]): Future[_] = Future.successful({})
+  override protected def report[X](tests: Traversable[TestResult[X]]) = Future.successful({})
 }

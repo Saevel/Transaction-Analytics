@@ -152,11 +152,11 @@ task prepareAcceptanceTestDockerBuild(type: Copy) {
 
 task buildAcceptanceTestDocker(type: DockerBuildImage) {
     inputDir = project.file(project.buildDir.path + "/acceptance/docker")
-    tag = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical-acceptance-tests"
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical-acceptance-tests"
 }
 
 task acceptanceTestDockerize(type: DockerPushImage) {
-    imageName = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical-acceptance-tests"
+    imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical-acceptance-tests"
 }
 
 // TODO: Implement
@@ -188,11 +188,11 @@ task prepareDockerBuild(type: Copy) {
 
 task dockerBuild(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
-    tag = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical"
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical"
 }
 
 task dockerize(type: DockerPushImage){
-    imageName = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + '/transaction-analytics-classical'
+    imageName = System.getenv("DOCKER_USERNAME") + '/transaction-analytics-classical'
 }
 
 acceptanceTest.dependsOn deploy

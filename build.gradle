@@ -73,6 +73,18 @@ task undeploy(type: Exec) {
     commandLine 'docker stack rm TransactionAnalytics'.tokenize()
 }
 
+void scaleService(String name, int scale){
+    exec(('docker service scale ' + name + "=" + scale))
+}
+
+/*
+task scale {
+    String name = project.property("service")
+    int instances = project.property("instances")
+    scaleService(name, instances)
+}
+*/
+
 task generateSampleStack {
     SwarmDeployment.generateDescriptor(new Stack(
             "3",

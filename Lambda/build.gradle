@@ -97,11 +97,11 @@ task prepareAcceptanceTestDockerBuild(type: Copy) {
 
 task buildAcceptanceTestDocker(type: DockerBuildImage) {
     inputDir = project.file(project.buildDir.path + "/acceptance/docker")
-    tag = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-acceptance-tests"
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-acceptance-tests"
 }
 
 task acceptanceTestDockerize(type: DockerPushImage) {
-    imageName = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + '/transaction-analytics-lambda-acceptance-tests'
+    imageName = System.getenv("DOCKER_USERNAME") + '/transaction-analytics-lambda-acceptance-tests'
 }
 
 // TODO: Implement
