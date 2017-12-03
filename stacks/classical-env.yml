@@ -1,0 +1,45 @@
+version: "3"
+
+networks:
+    common-network:
+        driver: overlay
+
+volumes:
+    portainer_data:
+
+services:
+
+    # CASSANDRA SEED NODE
+    cassandra-seed:
+        image: cassandra:3.11.0
+        deploy:
+          replicas: 1
+          restart_policy:
+            condition: on-failure
+        ports:
+        - 9042:9042   # Native transport
+        - 7199:7199   # JMX
+        - 9160:9160   # Thrift clients
+        - 7000:7000   # Gossip
+        environment:
+        - CASSANDRA_BROADCAST_ADDRESS=cassandra-seed
+        - CASSANDRA_SEEDS=cassandra-seed
+        networks:
+        - common-network
+
+    # CASSANDRA REGULAR NODE
+    cassandra-node:
+        image: cassandra:3.11.0
+        command: /bin/bash -c "echo 'Waiting for seed node' && sleep 80 && /docker-entrypoint.sh cassandra -f"
+        environment:
+        - CASSANDRA_SEEDS=cassandra-seed
+        deploy:
+          replicas: 1
+          restart_policy:
+            condition: on-failure
+        depends_on:
+        - cassandra-seed
+        networks:
+        - common-network
+        ports:
+        - 7000

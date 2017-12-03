@@ -1,0 +1,41 @@
+version: "3"
+
+networks:
+    common-network:
+        driver: overlay
+
+volumes:
+    portainer_data:
+
+services:
+
+    # Docker Registry
+    registry-srv:
+      image: registry:2
+      deploy:
+        replicas: 1
+        resources:
+          limits:
+            cpus: "0.5"
+            memory: 124M
+        restart_policy:
+          condition: on-failure
+      ports:
+      - "5000:5000"
+      networks:
+      - common-network
+
+    # Portainer UI
+    portainer:
+      image: portainer/portainer
+      deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+      ports:
+      - 9000:9000
+      networks:
+      - common-network
+      volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data

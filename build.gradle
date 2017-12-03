@@ -45,46 +45,32 @@ docker {
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
 }
 
-task it {
+task it(dependsOn: [':Classical:it', ":Lambda:it"]) {
     logger.println("Integration Tests for all applications")
 }
 
-it.dependsOn ":Classical:it"
-it.dependsOn ":Lambda:it"
-
-task dockerize {
+task dockerize(dependsOn: [':Classical:dockerize', ':Lambda:dockerize']) {
     logger.println("Dockerize all applications")
 }
 
-dockerize.dependsOn(':Classical:dockerize')
-dockerize.dependsOn(':Lambda:dockerize')
-
-// TODO: Fix the dependency problem
-task generateDeploymentDescriptor(dependsOn: dockerize) {
-    // TODO: Read the scale parameter + app type ?
-    // TODO: User SwarmDeployment to generate the proper descriptor.
+task deployEnvironment(type: Exec) {
+    commandLine 'docker stack deploy -c environment.yml global_env'.tokenize()
 }
 
-task deploy(type: Exec, dependsOn: generateDeploymentDescriptor) {
-    commandLine 'docker stack deploy -c stack.yml TransactionAnalytics'.tokenize()
+task undeployEnvironment(type: Exec) {
+    commandLine 'docker stack rm global_env'.tokenize()
 }
 
-task undeploy(type: Exec) {
-    commandLine 'docker stack rm TransactionAnalytics'.tokenize()
-}
+// TODO: Write a task that first runs all on classical, then all on lambda (deploy?)
 
-void scaleService(String name, int scale){
-    exec(('docker service scale ' + name + "=" + scale))
+task scale(type: Exec) << {
+    String name = project.properties.get("service")
+    int instances = Integer.parseInt(project.properties.get("instances"))
+    String command = 'docker service scale ' + name + '=' + instances
+    commandLine command.tokenize()
 }
 
 /*
-task scale {
-    String name = project.property("service")
-    int instances = project.property("instances")
-    scaleService(name, instances)
-}
-*/
-
 task generateSampleStack {
     SwarmDeployment.generateDescriptor(new Stack(
             "3",
@@ -95,7 +81,4 @@ task generateSampleStack {
             Maps.map(new Tuple("sample", new NetworkDefinition(NetworkDriver.overlay))),
     ));
 }
-
-deploy.dependsOn ':Classical:deploy'
-deploy.dependsOn ':Lambda:deploy'
-deploy.dependsOn dockerize
+*/

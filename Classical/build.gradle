@@ -63,18 +63,6 @@ sourceSets {
     }
 }
 
-
-task deploy {
-    String marathonUrl = System.getenv("DCOS_URL") + "/service/marathon-user";
-    // TODO: Marathon Application!
-    /*
-    MesosphereDeployment.deployToMarathon(marathonUrl, new MarathonApplication(
-       "Classical", "java -jar /usr/src/Classical-1.0-standalone.jar", "0.5", "256",
-            Arrays.asList(new PortDefinition(8080, "http", "http", null)), true, 1,
-    ))
-    */
-}
-
 dependencies {
 
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
@@ -106,7 +94,7 @@ docker {
     }
 }
 
-task fatJar(type: OneJar){
+task fatJar(type: OneJar, dependsOn: compileScala) {
     mainClass = 'org.dmcs.transaction.analytics.classical.ClassicalAnalyticsApplication'
 }
 
@@ -123,7 +111,7 @@ task acceptanceTestCompile(type: ScalaCompile) {
     scalaCompileOptions.incrementalOptions.analysisFile = new File("${buildDir}/tmp/scala/compilerAnalysis/compileCustomScala.analysis")
 }
 
-task acceptanceTestBaseJar(type: Jar){
+task acceptanceTestBaseJar(type: Jar, dependsOn: acceptanceTestCompile) {
     archiveName = 'Classical-Acceptance-Tests-partial.jar'
     manifest {
         attributes(
@@ -134,15 +122,13 @@ task acceptanceTestBaseJar(type: Jar){
     from 'build/classes/acceptance'
 }
 
-task acceptanceTestJar(type: OneJar) {
+task acceptanceTestJar(type: OneJar, dependsOn: acceptanceTestBaseJar) {
     mainClass = 'org.dmcs.transaction.analytics.classical.ClassicalAcceptanceTestsApplication'
     baseJar = acceptanceTestBaseJar
     archiveName = 'Classical-Acceptance-Tests.jar'
 }
 
-acceptanceTestJar.dependsOn(acceptanceTestBaseJar)
-
-task prepareAcceptanceTestDockerBuild(type: Copy) {
+task prepareAcceptanceTestDockerBuild(type: Copy, dependsOn: acceptanceTestJar) {
     from(project.buildDir.getAbsolutePath() + "/libs/Classical-Acceptance-Tests.jar")
     into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
 
@@ -150,35 +136,16 @@ task prepareAcceptanceTestDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
 }
 
-task buildAcceptanceTestDocker(type: DockerBuildImage) {
+task buildAcceptanceTestDocker(type: DockerBuildImage, dependsOn: prepareAcceptanceTestDockerBuild) {
     inputDir = project.file(project.buildDir.path + "/acceptance/docker")
     tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical-acceptance-tests"
 }
 
-task acceptanceTestDockerize(type: DockerPushImage) {
+task acceptanceTestDockerize(type: DockerPushImage, dependsOn: buildAcceptanceTestDocker) {
     imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical-acceptance-tests"
 }
 
-// TODO: Implement
-task acceptanceTest {
-    // TODO: Deploy acceptance tests to Maraton.
-    // String marathonUrl = System.getenv("DCOS_URL") + "/service/marathon-user";
-    logger.info("Acceptance Tests for the Classical project")
-    /*
-    MesosphereDeployment.deployToMarathon(marathonUrl, new MarathonApplication(
-            "Classical", "java -jar /usr/src/Classical-1.0-standalone.jar", "0.5", "256",
-            Arrays.asList(new PortDefinition(8080, "http", "http", null)), true, 1,
-    ))
-    */
-}
-
-acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
-prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
-buildAcceptanceTestDocker.dependsOn(prepareAcceptanceTestDockerBuild)
-acceptanceTestDockerize.dependsOn(buildAcceptanceTestDocker)
-acceptanceTest.dependsOn(acceptanceTestDockerize)
-
-task prepareDockerBuild(type: Copy) {
+task prepareDockerBuild(type: Copy, dependsOn: fatJar) {
     from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
     into(project.buildDir.getAbsolutePath() + "/docker")
 
@@ -186,20 +153,34 @@ task prepareDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/docker")
 }
 
-task dockerBuild(type: DockerBuildImage){
+task dockerBuild(type: DockerBuildImage, dependsOn: prepareDockerBuild) {
     inputDir = project.file(project.buildDir.path + "/docker")
     tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-classical"
 }
 
-task dockerize(type: DockerPushImage){
+task dockerize(type: DockerPushImage, dependsOn: dockerBuild) {
     imageName = System.getenv("DOCKER_USERNAME") + '/transaction-analytics-classical'
 }
 
-acceptanceTest.dependsOn deploy
-deploy.dependsOn dockerize
-dockerize.dependsOn dockerBuild
-dockerBuild.dependsOn prepareDockerBuild
-prepareDockerBuild.dependsOn fatJar
-fatJar.dependsOn build
-check.dependsOn it
-it.mustRunAfter test
+task deployEnvironment(type: Exec) {
+     logger.println "Deploy Lambda environment to Docker Swarm"
+    commandLine "docker stack deploy -c environment.yml classical_env".tokenize()
+}
+
+task undeployEnvironment(type: Exec) {
+    commandLine 'docker stack rm classical_env'.tokenize()
+}
+
+task deploy(type: Exec, dependsOn: dockerize) {
+    logger.println "Deploy Lambda application to Docker Swarm"
+    commandLine (("docker stack deploy -c " + project.projectDir + "/application.yml classical").tokenize())
+}
+
+task undeploy(type: Exec) {
+    commandLine 'docker stack rm classical'.tokenize()
+}
+
+task acceptanceTest(type: Exec, dependsOn: [deploy, acceptanceTestDockerize]) {
+    logger.info("Acceptance Tests for the Lambda project")
+    commandLine "docker stack deploy -c acceptance-tests.yml classical_acceptance_tests"
+}

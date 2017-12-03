@@ -1,0 +1,22 @@
+version: "3"
+
+networks:
+    lambda-tests-network:
+        driver: overlay
+
+services:
+    # Lambda Acceptance Tests
+    transaction-analytics-tests:
+        image: saevel/transaction-analytics-tests
+        environment:
+            - SPARK_MASTER_IP=0.0.0.0
+        deploy:
+          replicas: 1
+          update_config:
+            parallelism: 1
+            delay: 10s
+          restart_policy:
+            condition: on-failure
+        ports:
+        networks:
+          - lambda-tests-network

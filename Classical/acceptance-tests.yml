@@ -1,0 +1,18 @@
+version: "3"
+
+networks:
+    classical-tests-network:
+        driver: overlay
+
+services:
+    # Classical Application Acceptance Tests
+    transaction-analytics-tests:
+        image: saevel/transaction-analytics-classical-acceptance-tests
+        environment:
+        deploy:
+          replicas: 1
+          restart_policy:
+            condition: on-failure
+        ports:
+        networks:
+          - classical-tests-network
