@@ -11,7 +11,7 @@ import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, AccountEventT
 import scala.concurrent.Future
 
 //TODO: Should store UserAccounts not events?
-class DefaultUserAccountDao extends CassandraTable[UserAccountDao, UserAccount]{
+class UserAccounts extends CassandraTable[UserAccountDao, UserAccount]{
 
   object userId extends LongColumn(this)
 
@@ -24,7 +24,7 @@ class DefaultUserAccountDao extends CassandraTable[UserAccountDao, UserAccount]{
   object country extends OptionalStringColumn(this) with Index
 }
 
-abstract class UserAccountDao extends DefaultUserAccountDao with RootConnector {
+abstract class UserAccountDao extends UserAccounts with RootConnector {
 
   def findByCountry(country: String): Future[List[UserAccount]] =
     select.where(_.country eqs country).fetch

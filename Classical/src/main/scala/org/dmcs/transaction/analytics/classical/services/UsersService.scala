@@ -6,7 +6,6 @@ import org.dmcs.transaction.analytics.classical.dao.UserDataDao
 
 import scala.concurrent.{ExecutionContext, Future}
 
-//TODO: OBJECT OR TRAIT?
 trait UsersService {
 
   private[classical] def averageUserAge(implicit executionContext: ExecutionContext): Reader[UserDataDao, Future[Double]] =

@@ -27,16 +27,16 @@ package object dao {
 
   class DataBase(val keyspace: KeySpaceDef) extends Database[DataBase](keyspace) {
 
-    object defaultUserDataDao extends UserDataDao with keyspace.Connector
+    object userData extends UserDataDao with keyspace.Connector
 
-    object defaultUserAccountDao extends UserAccountDao with keyspace.Connector
+    object userAccounts extends UserAccountDao with keyspace.Connector
 
-    object defaultCashOperationsDao extends CashOperationsDao with keyspace.Connector
+    object cashOperations extends CashOperationsDao with keyspace.Connector
 
     def create: Unit = {
-      defaultCashOperationsDao.autocreate(space)
-      defaultUserAccountDao.autocreate(space)
-      defaultUserDataDao.autocreate(space)
+      cashOperations.autocreate(space)
+      userAccounts.autocreate(space)
+      userData.autocreate(space)
     }
   }
 

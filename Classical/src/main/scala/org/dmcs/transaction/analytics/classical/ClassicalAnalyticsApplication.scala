@@ -30,12 +30,18 @@ object ClassicalAnalyticsApplication extends App with RestInterface with Default
 
   Thread.sleep(100 * 1000)
 
+  /*
   val keySpace: String = %("cassandra.keyspace")
+
   DataAccessLayer.keyspace.session.execute(
     s"CREATE KEYSPACE $keySpace IF NOT EXISTS WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 1};"
   )
+  */
 
-  DataAccessLayer.create(Duration(%("cassandra.autocreate.timeout.seconds"), "seconds"))
+  DataAccessLayer.createAsync.onComplete {
+    case Success(results) => println(s"Created the database schema asynchronously")
+    case Failure(e) => println(s"Failed to create the database schema. Cause: ${e.getClass.getSimpleName}. Message: ${e.getMessage}")
+  }
 
   exposeRestInterface(%("http.default.host"), %("http.default.port")).onComplete {
     case Success(binding) =>

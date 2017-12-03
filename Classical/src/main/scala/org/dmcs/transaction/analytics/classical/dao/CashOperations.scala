@@ -8,7 +8,7 @@ import org.dmcs.transaction.analytics.lambda.events.{TransactionEvent, Transacti
 
 import scala.concurrent.Future
 
-class DefaultCashOperationsDao extends CassandraTable[CashOperationsDao, CashOperation]{
+class CashOperations extends CassandraTable[CashOperationsDao, CashOperation]{
 
   object timestamp extends DateTimeColumn(this) with PartitionKey
 
@@ -25,7 +25,7 @@ class DefaultCashOperationsDao extends CassandraTable[CashOperationsDao, CashOpe
       CashOperationType.fromString(kind(row)) ,amount(row))
 }
 
-abstract class CashOperationsDao extends DefaultCashOperationsDao with RootConnector {
+abstract class CashOperationsDao extends CashOperations with RootConnector {
 
   def findAll: Future[List[CashOperation]] = select.fetch
 

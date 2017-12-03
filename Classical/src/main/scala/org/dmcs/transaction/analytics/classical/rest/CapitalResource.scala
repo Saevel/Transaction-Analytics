@@ -27,7 +27,7 @@ trait CapitalResource extends CapitalService with DefaultTimeout {
   private def capitalVarianceInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = path("capital" / "variance") {
     parameters("start" ?, "end" ?) {
       withOptionalInterval { (start, end) =>
-        onSuccess(averageCapitalVariance(start, end).run(DataAccessLayer.defaultCashOperationsDao))( variance =>
+        onSuccess(averageCapitalVariance(start, end).run(DataAccessLayer.cashOperations))(variance =>
           complete(variance.toString)
         )
       }
@@ -37,7 +37,7 @@ trait CapitalResource extends CapitalService with DefaultTimeout {
   private def averageInsertionInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = path("capital" / "insertions" / "average") {
     parameters("start" ?, "end" ? ) {
       withOptionalInterval {  (start, end) =>
-        onSuccess(averageOperationValue(CashOperationType.Insertion, start, end).run(DataAccessLayer.defaultCashOperationsDao))( average =>
+        onSuccess(averageOperationValue(CashOperationType.Insertion, start, end).run(DataAccessLayer.cashOperations))(average =>
           complete(average.toString)
         )
       }
@@ -47,7 +47,7 @@ trait CapitalResource extends CapitalService with DefaultTimeout {
   private def averageWithdrawalInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = path("capital" / "withdrawals" / "average") {
     parameters("start" ? , "end" ?) {
       withOptionalInterval { (start, end) =>
-        onSuccess(averageOperationValue(CashOperationType.Withdrawal, start, end).run(DataAccessLayer.defaultCashOperationsDao))( average =>
+        onSuccess(averageOperationValue(CashOperationType.Withdrawal, start, end).run(DataAccessLayer.cashOperations))(average =>
           complete(average.toString)
         )
       }

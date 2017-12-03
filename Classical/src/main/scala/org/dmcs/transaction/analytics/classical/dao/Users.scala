@@ -8,8 +8,7 @@ import org.dmcs.transaction.analytics.lambda.events._
 
 import scala.concurrent.Future
 
-
-class DefaultUserDataDao extends CassandraTable[UserDataDao, UserData]{
+class Users extends CassandraTable[UserDataDao, UserData]{
 
   object userId extends LongColumn(this) with PartitionKey
 
@@ -18,7 +17,7 @@ class DefaultUserDataDao extends CassandraTable[UserDataDao, UserData]{
   override def fromRow(row: Row): UserData = UserData(userId(row), age(row))
 }
 
-abstract class UserDataDao extends DefaultUserDataDao with RootConnector {
+abstract class UserDataDao extends Users with RootConnector {
 
   def findAll: Future[List[UserData]] = select.fetch
 }
