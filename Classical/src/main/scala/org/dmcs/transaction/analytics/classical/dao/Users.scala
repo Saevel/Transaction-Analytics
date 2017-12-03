@@ -10,6 +10,8 @@ import scala.concurrent.Future
 
 class Users extends CassandraTable[UserDataDao, UserData]{
 
+  override def tableName: String = "USERS"
+
   object userId extends LongColumn(this) with PartitionKey
 
   object age extends IntColumn(this)

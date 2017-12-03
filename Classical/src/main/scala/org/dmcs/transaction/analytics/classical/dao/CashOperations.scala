@@ -10,6 +10,8 @@ import scala.concurrent.Future
 
 class CashOperations extends CassandraTable[CashOperationsDao, CashOperation]{
 
+  override def tableName: String = "CASH_OPERATIONS"
+
   object timestamp extends DateTimeColumn(this) with PartitionKey
 
   object sourceAccountId extends LongColumn(this)

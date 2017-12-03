@@ -13,6 +13,8 @@ import scala.concurrent.Future
 //TODO: Should store UserAccounts not events?
 class UserAccounts extends CassandraTable[UserAccountDao, UserAccount]{
 
+  override def tableName = "USER_ACCOUNTS"
+
   object userId extends LongColumn(this)
 
   object accountId extends LongColumn(this) with PartitionKey
