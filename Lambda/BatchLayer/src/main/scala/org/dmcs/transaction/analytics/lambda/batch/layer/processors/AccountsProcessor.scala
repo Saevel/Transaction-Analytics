@@ -7,9 +7,6 @@ import org.dmcs.transaction.analyst.lambda.model.UserAccount
 import org.dmcs.transaction.analytics.lambda.batch.layer.adapters.{AccountEventsAdapter, TransactionEventsAdapter, UserEventsAdapter}
 import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, TransactionEvent, UserEvent}
 
-/**
-  * Created by Zielony on 2016-08-03.
-  */
 trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter with TransactionEventsAdapter {
 
   def constructAccounts(implicit sqlContext: SQLContext): Dataset[UserAccount] = {

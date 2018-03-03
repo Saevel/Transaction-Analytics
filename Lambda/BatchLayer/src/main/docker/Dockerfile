@@ -9,4 +9,4 @@ COPY . /usr/src/BatchLayer
 
 WORKDIR /usr/src/BatchLayer
 
-ENTRYPOINT java -jar -Xmx8g BatchLayer-1.0-standalone.jar
+ENTRYPOINT crontab -e */5 * * * * java -jar -Xmx8g BatchLayer-1.0-standalone.jar

@@ -17,6 +17,17 @@ services:
       networks:
       - lambda-network
 
+    batch-layer:
+      image: saevel/transaction-analytics-lambda-batch-layer
+      deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+      ports:
+      - 9990:9990
+      networks:
+      - lambda-network
+
     # TODO: Add the method to deploy batch layer with a cron.
 
     # Spark Master

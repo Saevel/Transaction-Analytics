@@ -1,6 +1,5 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
-import org.dmcs.transaction.analytics.mesosphere.MesosphereDeployment
 
 group 'org.dmcs'
 
@@ -47,16 +46,18 @@ dependencies {
     compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.7.4'
     compile group: 'com.typesafe.scala-logging', name: 'scala-logging_2.11', version: '3.7.2'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-
 }
 
 docker {
     url=System.getenv('DOCKER_MACHINE_URL')
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
-}
 
-task fatJar(type: OneJar){
-    mainClass = 'org.dmcs.transaction.analyst.tests.app.TestsApplication'
+    registryCredentials {
+        url = System.getenv("DOCKER_REGISTRY_URL")
+        username = System.getenv("DOCKER_USERNAME")
+        password = System.getenv("DOCKER_PASSWORD")
+        email = System.getenv("DOCKER_USER_EMAIL")
+    }
 }
 
 /**
@@ -71,7 +72,11 @@ task getConfigs(type: Copy){
     }
 }
 
-task prepareDockerBuild(type: Copy) {
+task fatJar(type: OneJar, dependsOn: [build, getConfigs]){
+    mainClass = 'org.dmcs.transaction.analyst.tests.app.TestsApplication'
+}
+
+task prepareDockerBuild(type: Copy, dependsOn: fatJar) {
     from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
     into(project.buildDir.getAbsolutePath() + "/docker")
 
@@ -79,28 +84,16 @@ task prepareDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/docker")
 }
 
-task dockerBuild(type: DockerBuildImage){
+task dockerBuild(type: DockerBuildImage, dependsOn: prepareDockerBuild){
     inputDir = project.file(project.buildDir.path + "/docker")
     tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-tests"
 }
 
-task dockerize(type: DockerPushImage){
+task dockerize(type: DockerPushImage, dependsOn: dockerBuild){
     imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-tests"
 }
 
-
-// TODO: Implement!
-task deploy {
-    // String dcosUrl = System.getenv("DCOS_URL");
-    logger.debug "DCOS deployment: Deploying 'Tests' to Marathon"
-    // MesosphereDeployment.deployToChronos("http://localhost:8080", null)
+task deploy(type: Exec, dependsOn: dockerize){
+    // TODO: Moar docker parms
+    commandLine "docker run saevel/transaction-analytics-tests"
 }
-
-// Task dependencies configuration
-deploy.dependsOn dockerize
-dockerize.dependsOn fatJar
-dockerize.dependsOn dockerBuild
-dockerBuild.dependsOn prepareDockerBuild
-compileScala.dependsOn getConfigs
-fatJar.dependsOn build
-prepareDockerBuild.dependsOn fatJar

@@ -79,7 +79,7 @@ dependencies {
     testCompile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.12.6'
 
     acceptanceTestCompile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
-    acceptanceTestCompile project(':TestFramework')
+    acceptanceTestCompile project(':Tests')
 }
 
 docker {
@@ -183,4 +183,8 @@ task undeploy(type: Exec) {
 task acceptanceTest(type: Exec, dependsOn: [deploy, acceptanceTestDockerize]) {
     logger.info("Acceptance Tests for the Lambda project")
     commandLine "docker stack deploy -c acceptance-tests.yml classical_acceptance_tests"
+}
+
+task scale << {
+    int instances = Integer.parseInt(project.property("instances"))
 }

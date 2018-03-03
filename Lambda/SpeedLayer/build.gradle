@@ -81,10 +81,6 @@ docker {
     }
 }
 
-task fatJar(type: OneJar){
-    mainClass = 'org.dmcs.transaction.analytics.lambda.speed.layer.SpeedLayerApplication'
-}
-
 /**
  * Integration tests.
  */
@@ -92,6 +88,10 @@ task it(type: Test) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
+}
+
+task fatJar(type: OneJar, dependsOn: build){
+    mainClass = 'org.dmcs.transaction.analytics.lambda.speed.layer.SpeedLayerApplication'
 }
 
 /**
@@ -106,7 +106,7 @@ task getConfigs(type: Copy){
     }
 }
 
-task prepareDockerBuild(type: Copy) {
+task prepareDockerBuild(type: Copy, dependsOn: [getConfigs, fatJar]) {
     from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
     into(project.buildDir.getAbsolutePath() + "/docker")
 
@@ -114,27 +114,18 @@ task prepareDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/docker")
 }
 
-task dockerBuild(type: DockerBuildImage){
+task dockerBuild(type: DockerBuildImage, dependsOn: prepareDockerBuild){
     inputDir = project.file(project.buildDir.path + "/docker")
     tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
 }
 
-task dockerize(type: DockerPushImage){
+task dockerize(type: DockerPushImage, dependsOn: dockerBuild){
     imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
 }
 
-// TODO: Implement!
-task deploy {
-    logger.debug 'DCOS Deployment: Deploy SpeedLayer to Marathon'
-    // MesosphereDeployment.deployToMarathon("", null);
+task deploy(type: Exec, dependsOn: dockerize) << {
+    exec {
+        // TODO: Moar docker options.
+        commandLine(("docker run " + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer").tokenize())
+    }
 }
-
-// Task dependencies configuration
-deploy.dependsOn dockerize
-dockerize.dependsOn dockerBuild
-dockerBuild.dependsOn prepareDockerBuild
-prepareDockerBuild.dependsOn fatJar
-fatJar.dependsOn build
-compileScala.dependsOn getConfigs
-check.dependsOn it
-it.mustRunAfter test

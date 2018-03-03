@@ -63,12 +63,39 @@ task undeployEnvironment(type: Exec) {
 
 // TODO: Write a task that first runs all on classical, then all on lambda (deploy?)
 
-task scale(type: Exec) << {
-    String name = project.properties.get("service")
-    int instances = Integer.parseInt(project.properties.get("instances"))
-    String command = 'docker service scale ' + name + '=' + instances
-    commandLine command.tokenize()
+void scaleService(String name, int count){
+    exec {
+        commandLine "docker service scale $name=$count".tokenize()
+    }
 }
+
+void scaleClassical(int instances){
+    ['classical_cassandra-node', 'classical_transaction-analytics'].each { service -> scaleService(service, instances) }
+}
+
+void scaleLambda(int instances){
+    ['lambda_hdfs-datanode', 'lambda_spark-worker', 'lambda_speed-layer'].each { service -> scaleService(service, instances) }
+}
+
+void acceptanceTest(){
+    exec {
+        // TODO: Moar docker params.
+        commandLine "docker run saevel/transaction-analytics-tests"
+    }
+}
+
+task testClassical(dependsOn: [deployEnvironment, ':Classical:deploy', ':Classical:acceptanceTestDockerize']) << {
+    int maxInstances = project.property("maxInstances");
+    acceptanceTest();
+    for(int i = 2; i <= maxInstances; i++) {
+        scaleClassical(i);
+        acceptanceTestClassical();
+    }
+}
+
+testClassical.finalizedBy ':Classical:undeploy'
+
+task testLambda(dependsOn: [deployEnvironment, 'Lambda:deploy'])
 
 /*
 task generateSampleStack {
