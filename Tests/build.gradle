@@ -32,20 +32,20 @@ repositories {
 
 dependencies {
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    compile group: 'com.datastax.spark', name: 'spark-cassandra-connector_2.11', version: '1.6.0'
 
     compile project(':Model')
     compile project(':Events')
+    compile project(':TestFramework')
 
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.13.2'
-    compile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.6'
-    compile group: 'com.typesafe.play', name: 'play-json_2.11', version: '2.5.9'
-    compile group: 'com.nrinaudo', name: 'kantan.csv_2.11', version: '0.1.15'
-    compile group: 'com.sksamuel.avro4s', name: 'avro4s-core_2.11', version: '1.8.0'
-    compile group: 'org.apache.hadoop', name: 'hadoop-client', version: '2.7.4'
+    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '1.6.0'
     compile group: 'com.typesafe.scala-logging', name: 'scala-logging_2.11', version: '3.7.2'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.1.0'
+    compile group: 'com.typesafe.akka', name: 'akka-stream_2.11', version: '2.4.16'
+    compile group: 'com.typesafe.akka', name: 'akka-http-spray-json_2.11', version: '10.1.0'
 }
 
 docker {

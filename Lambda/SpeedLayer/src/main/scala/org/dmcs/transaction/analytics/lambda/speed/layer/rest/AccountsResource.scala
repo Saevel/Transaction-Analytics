@@ -17,7 +17,9 @@ private[rest] trait AccountsResource extends Directives with DefaultTimeout with
 
   def accountsInterface(implicit actorSystem: ActorSystem, materializer: Materializer, executionContext: ExecutionContext): Route = {
     path("accounts" / "country" / Segment / "active") { country =>
-      onSuccess(accountsActor ? CountAccountsByCountry(country))(respondWithLong)
+      get {
+        onSuccess(accountsActor ? CountAccountsByCountry(country))(respondWithLong)
+      }
     } ~ path("accounts" / "country" / Segment / "balance") { country =>
       ???
     }
