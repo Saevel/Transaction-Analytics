@@ -10,7 +10,7 @@ object Statistic {
     override def evaluate(data: Seq[DataType]) = f(data)
   }
 
-  def combine[DataType, IntermediateType : Numeric, StatType](flatMapper: DataType => Traversable[IntermediateType],
+  def combine[DataType, IntermediateType, StatType](flatMapper: DataType => Traversable[IntermediateType],
                                                              evaluator: Statistic[IntermediateType, StatType]): Statistic[DataType, StatType] =
     new Statistic[DataType, StatType] {
       override def evaluate(data: Seq[DataType]) = evaluator.evaluate(data.flatMap(flatMapper))

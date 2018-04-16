@@ -22,7 +22,7 @@ class TestRunner[DataType](reporter: Reporter, generator: Generator[DataType], p
   private[framework] def runPhase(tests: Seq[DataDrivenTest[DataType, _]],
                                   formerPhasesData: Seq[DataType],
                                   currentPhaseData: DataType,
-                                  phaseId: Int): Future[Seq[TestResult[_]]] =
+                                  phaseId: Int)(implicit ex: ExecutionContext): Future[Seq[TestResult[_]]] =
     tests
     .map(runTest(formerPhasesData, currentPhaseData, phaseId))
     .foldSequentially
@@ -30,7 +30,8 @@ class TestRunner[DataType](reporter: Reporter, generator: Generator[DataType], p
   private[framework] def runTest(formerPhasesData: Seq[DataType],
                                  currentPhaseData: DataType,
                                  phaseId: Int)
-                                (test: DataDrivenTest[DataType, _]): Future[TestResult[_]] =
+                                (test: DataDrivenTest[DataType, _])
+                                (implicit ex: ExecutionContext): Future[TestResult[_]] =
     test.execute(phaseId, formerPhasesData, currentPhaseData)
 
 

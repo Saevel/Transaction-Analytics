@@ -13,7 +13,7 @@ trait DataDrivenTest[DataType, StatType] {
 
   protected val name: String
 
-  protected val ingestor: Ingestor
+  protected val ingestor: Ingestor[DataType]
 
   protected val statistic: Statistic[DataType, StatType]
 

@@ -77,14 +77,15 @@ void scaleLambda(int instances){
     ['lambda_hdfs-datanode', 'lambda_spark-worker', 'lambda_speed-layer'].each { service -> scaleService(service, instances) }
 }
 
-void acceptanceTest(){
+void acceptanceTest(String type, String httpHost, int httpPort){
     exec {
-        // TODO: Moar docker params.
         commandLine "docker run saevel/transaction-analytics-tests"
     }
 }
 
-task testClassical(dependsOn: [deployEnvironment, ':Classical:deploy', ':Classical:acceptanceTestDockerize']) << {
+
+
+task testClassical(dependsOn: [deployEnvironment, ':Classical:deploy', ':Tests:dockerize']) << {
     int maxInstances = project.property("maxInstances");
     acceptanceTest();
     for(int i = 2; i <= maxInstances; i++) {

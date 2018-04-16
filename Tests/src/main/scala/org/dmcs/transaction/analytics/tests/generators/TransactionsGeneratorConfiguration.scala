@@ -11,7 +11,7 @@ case class TransactionsGeneratorConfiguration(insertionsPerPhase: Long,
 object TransactionsGeneratorConfiguration {
   def apply()(implicit bundle: Bundle): TransactionsGeneratorConfiguration = new TransactionsGeneratorConfiguration(
     %("generators.transactions.insertions.per.phase"),
-    %("generators.transactions.widthdrawals.per.phase"),
+    %("generators.transactions.withdrawals.per.phase"),
     %("generators.transactions.transfers.per.phase")
   )
 }

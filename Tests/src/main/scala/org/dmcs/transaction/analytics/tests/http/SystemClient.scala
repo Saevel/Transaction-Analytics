@@ -6,12 +6,19 @@ import java.time.format.DateTimeFormatter
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, ResponseEntity}
-import akka.http.scaladsl.unmarshalling.{PredefinedFromStringUnmarshallers, Unmarshal, Unmarshaller}
+import akka.http.scaladsl.unmarshalling.{PredefinedFromEntityUnmarshallers, PredefinedFromStringUnmarshallers, Unmarshal, Unmarshaller}
 import akka.stream.Materializer
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SystemClient(host: String, port: Int)(implicit formatter: DateTimeFormatter) extends PredefinedFromStringUnmarshallers {
+class SystemClient(host: String, port: Int)(implicit formatter: DateTimeFormatter) extends PredefinedFromStringUnmarshallers
+  with PredefinedFromEntityUnmarshallers {
+
+  implicit val intUnmarshaller: Unmarshaller[ResponseEntity, Int] = stringUnmarshaller.map(_.toInt)
+
+  implicit val doubleUnmarshaller: Unmarshaller[ResponseEntity, Double] = stringUnmarshaller.map(_.toDouble)
+
+  implicit val longUnmarshaller: Unmarshaller[ResponseEntity, Long] = stringUnmarshaller.map(_.toLong)
 
   def clientsAgeMedian(implicit actorSystem: ActorSystem,
                        ex: ExecutionContext,

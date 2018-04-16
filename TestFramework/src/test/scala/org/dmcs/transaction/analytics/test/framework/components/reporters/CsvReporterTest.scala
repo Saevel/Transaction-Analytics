@@ -34,7 +34,7 @@ class CsvReporterTest extends WordSpec with PropertyChecks with Matchers with Fi
     passed <- arbitrary[Boolean]
     delta <- arbitrary[Double]
     actual <- if(passed) Gen.choose(expected - delta, expected + delta) else Gen.choose(expected - 3 * delta, expected - 2 * delta)
-  } yield TestResult("sampleTest", phaseId, expected, actual, delta, passed, LocalDateTime.now, LocalDateTime.now)
+  } yield TestResult("sampleTest", phaseId, expected, actual, passed, LocalDateTime.now, LocalDateTime.now)
   ))
 
   "CsvReporter" should {
@@ -48,9 +48,9 @@ class CsvReporterTest extends WordSpec with PropertyChecks with Matchers with Fi
           .getLines()
           .map(_.split(","))
           .map(elements =>
-            TestResult[Double](elements(0), elements(1).toLong, elements(2).toDouble, elements(3).toDouble, elements(4).toDouble,
-              elements(5).toBoolean, LocalDateTime.parse(elements(6), DateTimeFormatter.ISO_DATE_TIME),
-              LocalDateTime.parse(elements(7), DateTimeFormatter.ISO_DATE_TIME))
+            TestResult[Double](elements(0), elements(1).toLong, elements(2).toDouble, elements(3).toDouble,
+              elements(4).toBoolean, LocalDateTime.parse(elements(5), DateTimeFormatter.ISO_DATE_TIME),
+              LocalDateTime.parse(elements(6), DateTimeFormatter.ISO_DATE_TIME))
           ).toSeq should contain theSameElementsAs(results)
       }
     }

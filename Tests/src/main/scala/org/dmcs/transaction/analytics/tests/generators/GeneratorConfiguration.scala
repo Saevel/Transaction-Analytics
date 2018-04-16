@@ -1,6 +1,7 @@
 package org.dmcs.transaction.analytics.tests.generators
 
 import org.dmcs.transaction.analytics.test.framework.components.generators.GenerationTimeout
+import org.dmcs.transaction.analytics.tests.generators.events.users.UsersGeneratorConfiguration
 import prv.zielony.proper.model.Bundle
 import prv.zielony.proper.inject._
 import prv.zielony.proper.converters.long

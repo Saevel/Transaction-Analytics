@@ -13,7 +13,7 @@ import org.dmcs.transaction.analytics.tests.statistics.Median
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ClientsAgeMedianTest(kind: String, override val ingestor: Ingestor, systemClient: SystemClient)
+class ClientsAgeMedianTest(kind: String, override val ingestor: Ingestor[ApplicationModel], systemClient: SystemClient)
                           (implicit actorSystem: ActorSystem, materializer: Materializer, ex: ExecutionContext)
   extends DataDrivenTest[ApplicationModel, Int] {
 

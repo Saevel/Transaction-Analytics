@@ -35,5 +35,5 @@ class CsvReporter(val targetFile: File) extends Reporter {
   }
 
   private[reporters] def stringify(result: TestResult[_]): String =
-    s"${result.testName},${result.phaseId},${result.expected},${result.actual},${result.delta},${result.passed},${formatter.format(result.startTimestamp)},${formatter.format(result.endTimestamp)}"
+    s"${result.testName},${result.phaseId},${result.expected},${result.actual},${result.passed},${formatter.format(result.startTimestamp)},${formatter.format(result.endTimestamp)}"
 }

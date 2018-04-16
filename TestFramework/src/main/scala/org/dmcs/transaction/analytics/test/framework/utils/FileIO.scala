@@ -6,10 +6,13 @@ trait FileIO {
 
   protected def withEmptyFile[T](path: String)(f: File => T): T = {
     val file = new File(path)
+    if(!file.getParentFile.exists()){
+      file.getParentFile.mkdirs()
+    }
     if(file.exists){
       file.delete
     }
-    file.createNewFile
+    file.createNewFile()
     f(file)
   }
 }

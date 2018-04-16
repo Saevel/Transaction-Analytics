@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext
 
 object Tests {
 
-  def apply(kind: String, countries: Seq[String], ingestor: Ingestor, systemClient: SystemClient)
+  def apply(kind: String, countries: Seq[String], ingestor: Ingestor[ApplicationModel], systemClient: SystemClient)
            (implicit ex: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer,
             doubleEquality: Equality[Double]): Seq[DataDrivenTest[ApplicationModel, _]] = Seq(
     new ClientsAgeMedianTest(kind, ingestor, systemClient),

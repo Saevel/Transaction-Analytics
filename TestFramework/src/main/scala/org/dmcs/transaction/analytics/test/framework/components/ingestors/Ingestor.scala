@@ -4,7 +4,7 @@ import org.dmcs.transaction.analytics.test.framework.schema.Schema
 
 import scala.concurrent.Future
 
-trait Ingestor {
+trait Ingestor[T] {
 
-  def ingest[T](data: T)(implicit schema: Schema[T]): Future[_]
+  def ingest(data: T): Future[_]
 }
