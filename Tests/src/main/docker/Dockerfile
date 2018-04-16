@@ -2,10 +2,8 @@ FROM java:8
 
 MAINTAINER Saevel
 
-#EXPOSE $HTTP_PORT
-
 COPY . /usr/src/Tests
 
 WORKDIR /usr/src/Tests
 
-ENTRYPOINT java -jar Tests-1.0-standalone.jar
+ENTRYPOINT java -Dspark.home=$SPARK_HOME -Dtest.kind=$TEST_KIND -Dhttp.host=$HTTP_HOST -Dhttp.port=$HTTP_PORT -Xmx2g -jar Tests-1.0-standalone.jar

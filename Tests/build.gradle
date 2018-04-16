@@ -70,7 +70,7 @@ task getConfigs(type: Copy){
 }
 
 task fatJar(type: OneJar, dependsOn: [build, getConfigs]){
-    mainClass = 'org.dmcs.transaction.analyst.tests.app.TestsApplication'
+    mainClass = 'org.dmcs.transaction.analytics.tests.AcceptanceTestsApplication'
 }
 
 task prepareDockerBuild(type: Copy, dependsOn: fatJar) {
@@ -90,7 +90,12 @@ task dockerize(type: DockerPushImage, dependsOn: dockerBuild){
     imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-tests"
 }
 
-task deploy(type: Exec, dependsOn: dockerize){
-    // TODO: Moar docker parms
-    commandLine "docker run saevel/transaction-analytics-tests"
+task testLambda(type: Exec, dependsOn: dockerize){
+    commandLine 'docker run -v /c/reports:/usr/reports -e "TEST_KIND=Lambda" -e "SPARK_MASTER=spark://spark-master:7077"' +
+            ' -e "HTTP_HOST=lambda_speed-layer" -e "HTTP_PORT=9990" saevel/transaction-analytics-tests'
+}
+
+task testClassical(type: Exec, dependsOn: dockerize){
+    commandLine 'docker run -v /c/reports:/usr/reports -e "TEST_KIND=Classical" -e "SPARK_MASTER=spark://spark-master:7077"' +
+            ' -e "HTTP_HOST=classical_transaction-analytics" -e "HTTP_PORT=9999" saevel/transaction-analytics-tests'
 }

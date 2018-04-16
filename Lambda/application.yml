@@ -28,44 +28,6 @@ services:
       networks:
       - lambda-network
 
-    # TODO: Add the method to deploy batch layer with a cron.
-
-    # Spark Master
-    spark-master:
-        image: fsoppelsa/spark-master
-        environment:
-            - SPARK_MASTER_IP=0.0.0.0
-        deploy:
-          replicas: 1
-          update_config:
-            parallelism: 1
-            delay: 10s
-          restart_policy:
-            condition: on-failure
-        ports:
-          - 8080:8080
-          - 7077:7077
-          - 6066:6066
-        networks:
-          - lambda-network
-
-    # Spark Worker
-    spark-worker:
-        image: fsoppelsa/spark-worker
-        environment:
-        - SPARK_MASTER_IP=spark-master
-        depends_on:
-        - spark-master
-        deploy:
-          replicas: 3
-          update_config:
-            parallelism: 1
-            delay: 10s
-          restart_policy:
-            condition: on-failure
-        networks:
-          - lambda-network
-
     # HDFS NAMENODE
     hdfs-namenode:
         image: sfedyakov/hadoop-271-cluster

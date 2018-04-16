@@ -8,4 +8,4 @@ COPY . /usr/src/SpeedLayer
 
 WORKDIR /usr/src/SpeedLayer
 
-ENTRYPOINT java -jar SpeedLayer-1.0-standalone.jar
+ENTRYPOINT java -Xmx1g -jar SpeedLayer-1.0-standalone.jar

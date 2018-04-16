@@ -54,14 +54,12 @@ task dockerize(dependsOn: [':Classical:dockerize', ':Lambda:dockerize']) {
 }
 
 task deployEnvironment(type: Exec) {
-    commandLine 'docker stack deploy -c environment.yml global_env'.tokenize()
+    commandLine 'docker stack deploy -c environment.yml env'.tokenize()
 }
 
 task undeployEnvironment(type: Exec) {
-    commandLine 'docker stack rm global_env'.tokenize()
+    commandLine 'docker stack rm env'.tokenize()
 }
-
-// TODO: Write a task that first runs all on classical, then all on lambda (deploy?)
 
 void scaleService(String name, int count){
     exec {

@@ -2,6 +2,7 @@ group 'org.dmcs'
 
 version '1.0'
 
+/*
 buildscript {
     repositories {
         jcenter()
@@ -23,12 +24,14 @@ apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
+*/
 configurations {
-    acceptanceTestCompile{} extendsFrom compile
-    acceptanceTestRuntime{} extendsFrom runtime
+    // acceptanceTestCompile{} extendsFrom compile
+    // acceptanceTestRuntime{} extendsFrom runtime
 }
 
 sourceSets {
+    /*
     acceptanceTests {
         java {
             compileClasspath += main.output + configurations.acceptanceTestCompile
@@ -37,16 +40,17 @@ sourceSets {
         }
         resources.srcDir file('src/acceptance/resources')
     }
+    */
 }
 
 repositories {
-    mavenCentral()
-    jcenter()
+    // mavenCentral()
+    // jcenter()
 }
 
 dependencies {
-    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
-    acceptanceTestCompile project(':Tests')
+    // compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    // acceptanceTestCompile project(':Tests')
 }
 
 docker {
@@ -65,8 +69,8 @@ task dockerize(dependsOn: [':Lambda:BatchLayer:dockerize', ':Lambda:SpeedLayer:d
 
 task it(dependsOn: [':Lambda:BatchLayer:it', ':Lambda:SpeedLayer:it']){}
 
+/*
 task acceptanceTestCompile(type: ScalaCompile) {
-    source = fileTree(dir: 'src/acceptance/scala', include: '**/*.scala')
     destinationDir = file('build/classes/acceptance')
     classpath = sourceSets.acceptanceTests.runtimeClasspath
     scalaCompileOptions.incrementalOptions.analysisFile = new File("${buildDir}/tmp/scala/compilerAnalysis/compileCustomScala.analysis")
@@ -105,7 +109,9 @@ task buildAcceptanceTestDocker(type: DockerBuildImage, dependsOn: prepareAccepta
 task acceptanceTestDockerize(type: DockerPushImage, dependsOn: buildAcceptanceTestDocker) {
     imageName = System.getenv("DOCKER_USERNAME") + '/transaction-analytics-lambda-acceptance-tests'
 }
+*/
 
+/*
 task deployEnvironment(type: Exec) {
     logger.println "Deploy Lambda environment to Docker Swarm"
     commandLine "docker stack deploy -c environment.yml lambda_env".tokenize()
@@ -114,8 +120,9 @@ task deployEnvironment(type: Exec) {
 task undeployEnvironment(type: Exec) {
     commandLine 'docker stack rm lambda_env'.tokenize()
 }
+*/
 
-task deploy(type: Exec, dependsOn: [deployEnvironment, dockerize]) {
+task deploy(type: Exec, dependsOn: [dockerize]) {
     logger.println "Deploy Lambda application to Docker Swarm"
     commandLine "docker stack deploy -c application.yml lambda".tokenize()
 }
@@ -124,20 +131,16 @@ task undeploy(type: Exec) {
     commandLine "docker stack rm lambda".tokenize()
 }
 
+/*
 task acceptanceTest(type: Exec, dependsOn: [deploy, acceptanceTestDockerize]) {
     logger.info("Acceptance Tests for the Lambda project")
     commandLine "docker stack deploy -c acceptance-tests.yml lambda_acceptance_tests"
 }
+*/
 
+/*
 task scale << {
     int instances = Integer.parseInt(project.property("instances"))
     scaleLambda(instances)
 }
-
-task testAll(dependsOn: []) << {
-
-    int maxInstances = Integer.parseInt(project.property("maxInstances"))
-    for(int i = 2; i <= maxInstances; i++){
-
-    }
-}
+*/

@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext}
 import org.dmcs.transaction.analytics.test.framework.components.generators.Generator
 import org.dmcs.transaction.analytics.test.framework.components.ingestors.{IdleIngestor, Ingestor}
@@ -31,9 +31,9 @@ object AcceptanceTestsApplication extends App {
   implicit val bundle: Bundle = load(classpath :/ "application.properties")
 
   private val configuration: AcceptanceTestConfiguration = AcceptanceTestConfiguration(
-    TestKind.withName(System.getProperty("test.kind")),
-    System.getProperty("http.host"),
-    System.getProperty("http.port").toInt
+    TestKind.withName(System.getenv("TEST_KIND")),
+    System.getenv("HTTP_HOST"),
+    System.getenv("HTTP_PORT").toInt
   )
 
   private val ex = implicitly[ExecutionContext]
@@ -41,12 +41,21 @@ object AcceptanceTestsApplication extends App {
   private val generator: Generator[ApplicationModel] = ApplicationModelGenerator(configuration.generators)
 
   private val reporter = new CsvReporter(
-    new File(s"build/${configuration.tests.kind}/${LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss"))}/${configuration.tests.outputFile}")
+    new File(s"/usr/reports/${configuration.tests.kind}/${LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss"))}/${configuration.tests.outputFile}")
   )
 
-  private implicit val context: SparkContext = new SparkContext(new SparkConf().setAppName(s"AcceptanceTests${configuration.tests.kind}"))
+  private implicit val session: SparkSession = SparkSession.builder.
+    appName(s"AcceptanceTests${configuration.tests.kind}")
+    .master(System.getenv("SPARK_MASTER"))
+    .config("spark.cassandra.connection.host", configuration.ingestion.cassandra.host)
+    .config("spark.cassandra.connection.port", configuration.ingestion.cassandra.port.toString)
+    .config("spark.cassandra.auth.username", configuration.ingestion.cassandra.username)
+    .config("spark.cassandra.auth.password", configuration.ingestion.cassandra.password)
+    .getOrCreate
 
-  private implicit val sqlContext: SQLContext = new SQLContext(context)
+  private implicit val context: SparkContext = session.sparkContext
+
+  private implicit val sqlContext: SQLContext = session.sqlContext
 
   private implicit val actorSystem: ActorSystem = ActorSystem(s"AcceptanceTests${configuration.tests.kind}")
 
@@ -54,15 +63,13 @@ object AcceptanceTestsApplication extends App {
 
   private implicit val doubleEquality: Equality[Double] = Equality[Double]((x: Double, y: Double) => Math.abs(x - y) < configuration.tests.doublePrecision)
 
-  /*
   private val ingestor: Ingestor[ApplicationModel] = if(configuration.tests.kind == TestKind.Classical) {
     CassandraIngestor(configuration.ingestion.cassandra)
   } else {
     HDFSIngestor(configuration.ingestion.hdfs)
   }
-  */
 
-  private val ingestor: Ingestor[ApplicationModel] = CsvIngestor(s"data/${LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss"))}")
+  // private val ingestor: Ingestor[ApplicationModel] = CsvIngestor(s"data/${LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss"))}")
 
   private val systemClient: SystemClient = new SystemClient(configuration.http.host, configuration.http.port)
 
