@@ -13,8 +13,6 @@ trait DataDrivenTest[DataType, StatType] {
 
   protected val name: String
 
-  protected val ingestor: Ingestor[DataType]
-
   protected val statistic: Statistic[DataType, StatType]
 
   protected val equality: Equality[StatType]
@@ -22,12 +20,8 @@ trait DataDrivenTest[DataType, StatType] {
   protected def actualStatistic: () => Future[StatType]
 
   def execute(phaseId: Int, allData: Seq[DataType], phaseData: DataType)
-             (implicit ex: ExecutionContext): Future[TestResult[StatType]] = {
-      val startTimestamp = LocalDateTime.now
-      ingestor
-        .ingest(phaseData)
-        .flatMap(_ => actualStatistic().map(actual => makeResult(statistic.evaluate(allData), actual, startTimestamp, phaseId)))
-      }
+             (implicit ex: ExecutionContext): Future[TestResult[StatType]] =
+    actualStatistic().map(actual => makeResult(statistic.evaluate(allData), actual, LocalDateTime.now, phaseId))
 
   private[framework] def makeResult(expected: StatType,
                                     actual: StatType,

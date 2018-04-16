@@ -6,5 +6,5 @@ import scala.concurrent.Future
 
 trait Ingestor[T] {
 
-  def ingest(data: T): Future[_]
+  def ingest(data: T, phaseId: Int): Unit
 }

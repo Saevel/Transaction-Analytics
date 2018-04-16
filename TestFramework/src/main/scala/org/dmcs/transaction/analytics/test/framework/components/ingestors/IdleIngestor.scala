@@ -4,5 +4,5 @@ import scala.concurrent.Future
 
 object IdleIngestor extends Ingestor[Any] {
 
-  override def ingest(data: Any): Future[_] = Future.successful({})
+  override def ingest(data: Any, phaseId: Int): Unit = {}
 }

@@ -26,11 +26,9 @@ import prv.zielony.proper.utils.load
 
 object AcceptanceTestsApplication extends App {
 
-
   implicit val formatter = DateTimeFormatter.ISO_DATE_TIME
 
   implicit val bundle: Bundle = load(classpath :/ "application.properties")
-
 
   private val configuration: AcceptanceTestConfiguration = AcceptanceTestConfiguration(
     TestKind.withName(System.getProperty("test.kind")),
@@ -38,12 +36,13 @@ object AcceptanceTestsApplication extends App {
     System.getProperty("http.port").toInt
   )
 
-
   private val ex = implicitly[ExecutionContext]
 
   private val generator: Generator[ApplicationModel] = ApplicationModelGenerator(configuration.generators)
 
-  private val reporter = new CsvReporter(new File(configuration.tests.outputFile))
+  private val reporter = new CsvReporter(
+    new File(s"build/${configuration.tests.kind}/${LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd-hh-mm-ss"))}/${configuration.tests.outputFile}")
+  )
 
   private implicit val context: SparkContext = new SparkContext(new SparkConf().setAppName(s"AcceptanceTests${configuration.tests.kind}"))
 
@@ -70,15 +69,18 @@ object AcceptanceTestsApplication extends App {
   private val tests: Seq[DataDrivenTest[ApplicationModel, _]] =
     Tests(configuration.tests.kind.toString, configuration.generators.users.countries, ingestor, systemClient)
 
-  private val testRunner: TestRunner[ApplicationModel] = new TestRunner[ApplicationModel](reporter, generator, configuration.tests.phaseCount)
+  private val testRunner: TestRunner[ApplicationModel] =
+    new TestRunner[ApplicationModel](reporter, generator, ingestor, configuration.tests.phaseCount)
 
   Try(Await.result(testRunner.runAll(tests)(ex, configuration.generators.generationTimeouts), configuration.tests.testTimeout)) match {
-    case Success(_) => println("All tests run successfully")
+    case Success(_) => {
+      println("All tests run successfully")
+      System.exit(0)
+    }
     case Failure(e) => {
       println("Failure while running tests")
       e.printStackTrace
+      System.exit(1)
     }
   }
-
-  println(Random.nextLong)
 }

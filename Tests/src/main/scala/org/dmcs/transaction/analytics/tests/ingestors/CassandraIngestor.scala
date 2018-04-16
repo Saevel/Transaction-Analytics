@@ -11,7 +11,7 @@ object CassandraIngestor {
 
   def apply(configuration: CassandraConfiguration)
            (implicit sqlContext: SQLContext, ex: ExecutionContext): Ingestor[ApplicationModel] = new Ingestor[ApplicationModel] {
-    override def ingest(data: ApplicationModel): Future[_] = Future {
+    override def ingest(data: ApplicationModel, phaseId: Int): Unit = {
       import sqlContext.implicits._
       data.entitiesModel.operations.toSeq.toDF.write.cassandraFormat(configuration.operationsTable, configuration.keyspace)
       data.entitiesModel.userAccounts.toSeq.toDF.write.cassandraFormat(configuration.usersTable, configuration.keyspace)

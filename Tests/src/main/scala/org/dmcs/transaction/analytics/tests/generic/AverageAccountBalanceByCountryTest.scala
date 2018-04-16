@@ -13,7 +13,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AverageAccountBalanceByCountryTest(kind: String,
                                          country: String,
-                                         override val ingestor: Ingestor[ApplicationModel],
                                          systemClient: SystemClient,
                                          override val equality: Equality[Double])
                                         (implicit actorSystem: ActorSystem,

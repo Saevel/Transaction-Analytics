@@ -16,12 +16,12 @@ object Tests {
   def apply(kind: String, countries: Seq[String], ingestor: Ingestor[ApplicationModel], systemClient: SystemClient)
            (implicit ex: ExecutionContext, actorSystem: ActorSystem, materializer: Materializer,
             doubleEquality: Equality[Double]): Seq[DataDrivenTest[ApplicationModel, _]] = Seq(
-    new ClientsAgeMedianTest(kind, ingestor, systemClient),
-    new AverageClientAgeTest(kind, ingestor, systemClient, doubleEquality),
-    new ActiveAccountsByCountryTest(kind, countries.sample, ingestor, systemClient),
-    new AverageAccountBalanceByCountryTest(kind, countries.sample, ingestor, systemClient, doubleEquality),
-    new AverageInsertionInPeriodTest(kind, ingestor, systemClient, doubleEquality),
-    new AverageWithdrawalInPeriodTest(kind, ingestor, systemClient, doubleEquality),
-    new CapitalVariationInPeriodTest(kind, ingestor, systemClient, doubleEquality)
+    new ClientsAgeMedianTest(kind, systemClient),
+    new AverageClientAgeTest(kind, systemClient, doubleEquality),
+    new ActiveAccountsByCountryTest(kind, countries.sample, systemClient),
+    new AverageAccountBalanceByCountryTest(kind, countries.sample, systemClient, doubleEquality),
+    new AverageInsertionInPeriodTest(kind, systemClient, doubleEquality),
+    new AverageWithdrawalInPeriodTest(kind, systemClient, doubleEquality),
+    new CapitalVariationInPeriodTest(kind, systemClient, doubleEquality)
   )
 }

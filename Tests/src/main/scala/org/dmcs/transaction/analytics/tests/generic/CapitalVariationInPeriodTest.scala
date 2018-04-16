@@ -15,7 +15,6 @@ import org.dmcs.transaction.analytics.tests.statistics.DoubleAverage
 import scala.concurrent.{ExecutionContext, Future}
 
 class CapitalVariationInPeriodTest(kind: String,
-                                   override val ingestor: Ingestor[ApplicationModel],
                                    systemClient: SystemClient,
                                    override val equality: Equality[Double])
                                   (implicit system: ActorSystem, m: Materializer, ex: ExecutionContext) extends DataDrivenTest[ApplicationModel, Double] {

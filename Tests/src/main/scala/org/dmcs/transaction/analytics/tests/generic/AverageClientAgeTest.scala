@@ -12,7 +12,6 @@ import org.dmcs.transaction.analytics.tests.statistics.IntAverage
 import scala.concurrent.{ExecutionContext, Future}
 
 class AverageClientAgeTest(kind: String,
-                           override val ingestor: Ingestor[ApplicationModel],
                            systemClient: SystemClient,
                            override val equality: Equality[Double])
                           (implicit actorSystem: ActorSystem, materializer: Materializer, ex: ExecutionContext)

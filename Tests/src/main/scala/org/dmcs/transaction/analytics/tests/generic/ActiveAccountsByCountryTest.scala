@@ -13,7 +13,6 @@ import scala.concurrent.ExecutionContext
 
 class ActiveAccountsByCountryTest(kind:String,
                                   country: String,
-                                  override val ingestor: Ingestor[ApplicationModel],
                                   systemClient: SystemClient)
                                  (implicit actorSystem: ActorSystem,
                                   materializer: Materializer,
@@ -28,6 +27,5 @@ class ActiveAccountsByCountryTest(kind:String,
 
   override protected val equality: Equality[Long] = Equality[Long]
 
-  // TODO: Maybe make this depend on all data up to current phase? WHAT ABOUT THE STATISTIC?
   override protected def actualStatistic = () => systemClient.activeAccountsFor(country)
 }
