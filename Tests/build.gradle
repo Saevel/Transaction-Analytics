@@ -1,0 +1,101 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+
+group 'org.dmcs'
+
+version '1.0'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+        classpath 'com.bmuschko:gradle-docker-plugin:3.0.8'
+    }
+}
+
+project.ext.set("configs", "batch,spark,mds")
+
+apply plugin: 'scala'
+
+apply plugin: 'gradle-one-jar'
+
+apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    compile group: 'com.datastax.spark', name: 'spark-cassandra-connector_2.11', version: '2.0.0'
+
+    compile project(':Model')
+    compile project(':Events')
+    compile project(':TestFramework')
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '2.1.0'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.0.1'
+    compile group: 'com.typesafe.akka', name: 'akka-http-spray-json_2.11', version: '10.0.1'
+}
+
+docker {
+    url=System.getenv('DOCKER_MACHINE_URL')
+    certPath=file(System.getenv('DOCKER_CERT_PATH'))
+
+    registryCredentials {
+        url = System.getenv("DOCKER_REGISTRY_URL")
+        username = System.getenv("DOCKER_USERNAME")
+        password = System.getenv("DOCKER_PASSWORD")
+        email = System.getenv("DOCKER_USER_EMAIL")
+    }
+}
+
+/**
+ * Copies config from the top-level project into this module.
+ */
+task getConfigs(type: Copy){
+    if(project.hasProperty('configs')){
+        configs.split(",").each{ config ->
+            from(rootProject.projectDir.getAbsolutePath() + "/src/main/resources/" + config + ".properties")
+            into(project.buildDir.getAbsolutePath() + "/resources/main")
+        }
+    }
+}
+
+task fatJar(type: OneJar, dependsOn: [build, getConfigs]){
+    mainClass = 'org.dmcs.transaction.analytics.tests.AcceptanceTestsApplication'
+}
+
+task prepareDockerBuild(type: Copy, dependsOn: fatJar) {
+    from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+
+    from(project.projectDir.getAbsolutePath() + "/src/main/docker")
+    into(project.buildDir.getAbsolutePath() + "/docker")
+}
+
+task dockerBuild(type: DockerBuildImage, dependsOn: prepareDockerBuild){
+    inputDir = project.file(project.buildDir.path + "/docker")
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-tests"
+}
+
+task dockerize(type: DockerPushImage, dependsOn: dockerBuild){
+    imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-tests"
+}
+
+task testLambda(type: Exec, dependsOn: dockerize){
+    commandLine 'docker run -v /c/reports:/usr/reports -e "TEST_KIND=Lambda" -e "SPARK_MASTER=spark://spark-master:7077"' +
+            ' -e "HTTP_HOST=lambda_speed-layer" -e "HTTP_PORT=9990" saevel/transaction-analytics-tests'
+}
+
+task testClassical(type: Exec, dependsOn: dockerize){
+    commandLine 'docker run -v /c/reports:/usr/reports -e "TEST_KIND=Classical" -e "SPARK_MASTER=spark://spark-master:7077"' +
+            ' -e "HTTP_HOST=classical_transaction-analytics" -e "HTTP_PORT=9999" saevel/transaction-analytics-tests'
+}

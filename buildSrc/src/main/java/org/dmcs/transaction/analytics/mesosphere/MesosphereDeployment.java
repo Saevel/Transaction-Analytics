@@ -15,13 +15,13 @@ import java.io.IOException;
 public class MesosphereDeployment {
 
     // TODO: Username / password!
-    public static void deployToChronos(String url, ChronosJob job) throws IOException {
-        deployViaRest(url + "/v1/scheduler/iso8601", job);
+    public static void deployToChronos(String dcosUrl, ChronosJob job) throws IOException {
+        deployViaRest(dcosUrl + "/chronos/v1/scheduler/iso8601", job);
     }
 
     // TODO: Username / password!
-    public static void deployToMarathon(String url, MarathonApplication application) throws IOException {
-        deployViaRest(url + "/v2/apps", application);
+    public static void deployToMarathon(String dcosUrl, MarathonApplication application) throws IOException {
+        deployViaRest(dcosUrl + "/service/marathon-user/v2/apps", application);
     }
 
     // TODO: Username / password!

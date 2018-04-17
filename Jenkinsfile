@@ -8,6 +8,8 @@ pipeline {
         DOCKER_REGISTRY_URL = credentials('DOCKER_REGISTRY_URL')
         DOCKER_USER_EMAIL = credentials('DOCKER_USER_EMAIL')
         DOCKER_PASSWORD = credentials('DOCKER_PASSWORD')
+
+        DOCS_URL = credentials('DCOS_URL')
     }
 
     stages {

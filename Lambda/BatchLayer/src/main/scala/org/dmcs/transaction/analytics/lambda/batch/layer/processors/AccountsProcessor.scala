@@ -7,9 +7,6 @@ import org.dmcs.transaction.analyst.lambda.model.UserAccount
 import org.dmcs.transaction.analytics.lambda.batch.layer.adapters.{AccountEventsAdapter, TransactionEventsAdapter, UserEventsAdapter}
 import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, TransactionEvent, UserEvent}
 
-/**
-  * Created by Zielony on 2016-08-03.
-  */
 trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter with TransactionEventsAdapter {
 
   def constructAccounts(implicit sqlContext: SQLContext): Dataset[UserAccount] = {
@@ -67,7 +64,7 @@ trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter with
       val (removed, _) = pair
       removed
     }
-    created.subtract(createdAndRemoved)
+    created.except(createdAndRemoved)
   }
 
   private def activeUsers(created: Dataset[UserEvent],
@@ -79,13 +76,13 @@ trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter with
       removed
     }
 
-    val latestUpdates = updated.groupBy(_.id).mapGroups((id, iterator) =>
+    val latestUpdates = updated.groupByKey(_.id).mapGroups((id, iterator) =>
       iterator.reduce { (first, second) =>
         if(first.timestamp.after(second.timestamp)) first else second
       }
     )
 
-    created.subtract(createdButRemoved).joinWith(latestUpdates, $"id" === $"id").map{ pair =>
+    created.except(createdButRemoved).joinWith(latestUpdates, $"id" === $"id").map{ pair =>
       val (_, update) = pair
       update
     }
@@ -98,19 +95,19 @@ trait AccountsProcessor extends AccountEventsAdapter with UserEventsAdapter with
                             (implicit sqlContext: SQLContext): Dataset[(Long, Double)] = {
     import sqlContext.implicits._
 
-    val insertionsByAccount = insertions.groupBy(_.sourceAccount).mapGroups {
+    val insertionsByAccount = insertions.groupByKey(_.sourceAccount).mapGroups {
       case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
     }
 
-    val withdrawalsByAccount = withdrawals.groupBy(_.sourceAccount).mapGroups{
+    val withdrawalsByAccount = withdrawals.groupByKey(_.sourceAccount).mapGroups{
       case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
     }
 
-    val transferSources = transfers.filter(_.targetAccount.isDefined).groupBy(_.sourceAccount).mapGroups {
+    val transferSources = transfers.filter(_.targetAccount.isDefined).groupByKey(_.sourceAccount).mapGroups {
       case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
     }
 
-    val transferTargets = transfers.filter(_.targetAccount.isDefined).groupBy(_.targetAccount.get).mapGroups{
+    val transferTargets = transfers.filter(_.targetAccount.isDefined).groupByKey(_.targetAccount.get).mapGroups{
       case (id, iterator) => (id, iterator.map(_.amount).reduce(_+_))
     }
 

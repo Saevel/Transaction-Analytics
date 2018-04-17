@@ -5,9 +5,6 @@ import org.dmcs.transaction.analytics.lambda.batch.layer.spark.Spark
 import org.dmcs.transaction.analytics.lambda.events.{AccountEvent, AccountEventType}
 import org.dmcs.transaction.analytics.lambda.events.AccountEventType._
 
-/**
-  * Created by Zielony on 2016-08-03.
-  */
 trait AccountEventsAdapter extends Spark {
 
   val accountEventsPath: String

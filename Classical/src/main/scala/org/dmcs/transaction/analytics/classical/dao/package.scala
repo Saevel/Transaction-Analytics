@@ -21,26 +21,22 @@ package object dao {
     def toDateTime: DateTime = new DateTime(timestamp.toInstant)
   }
 
-  //TODO: Keyspace from .properties
   private object Defaults {
-    val connector = ContactPoint.local.keySpace(%("cassandra.keyspace"))
+    val connector = ContactPoint(%("cassandra.host"), %("cassandra.port")).keySpace(%("cassandra.keyspace"))
   }
 
   class DataBase(val keyspace: KeySpaceDef) extends Database[DataBase](keyspace) {
 
-    object defaultUserDataDao extends UserDataDao with keyspace.Connector
+    object userData extends UserDataDao with keyspace.Connector
 
-    object defaultUserAccountDao extends UserAccountDao with keyspace.Connector
+    object userAccounts extends UserAccountDao with keyspace.Connector
 
-    object defaultCashOperationsDao extends CashOperationsDao with keyspace.Connector
+    object cashOperations extends CashOperationsDao with keyspace.Connector
 
-    //TODO: KEYSPACE?
     def create: Unit = {
-      /*
-      defaultCashOperationsDao.autocreate(???)
-      defaultUserAccountDao.autocreate(???)
-      defaultUserDataDao.autocreate(???)
-      */
+      cashOperations.autocreate(space)
+      userAccounts.autocreate(space)
+      userData.autocreate(space)
     }
   }
 

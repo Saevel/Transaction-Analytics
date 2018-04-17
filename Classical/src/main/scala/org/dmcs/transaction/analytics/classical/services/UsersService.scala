@@ -6,22 +6,20 @@ import org.dmcs.transaction.analytics.classical.dao.UserDataDao
 
 import scala.concurrent.{ExecutionContext, Future}
 
-//TODO: OBJECT OR TRAIT?
 trait UsersService {
 
   private[classical] def averageUserAge(implicit executionContext: ExecutionContext): Reader[UserDataDao, Future[Double]] =
     Reader( dao => dao.findAll.map(users =>
       users
         .map(_.age)
-        .reduce((first, second) => (first + second) / users.length)
+        .foldLeft(0.0)((first, second) => (first + second) / users.length)
     ))
 
   private[classical] def userAgeMedian(implicit executionContext: ExecutionContext): Reader[UserDataDao, Future[Int]] = Reader (dao =>
     dao.findAll.map(users =>
       users
         .map(_.age)
-        .sorted
-        .apply(Math.floorDiv(users.length, 2))
+        .sorted.applyOrElse(Math.floorDiv(users.length, 2), {_: Int => 0})
     )
   )
 }

@@ -8,7 +8,6 @@ import java.time.LocalDateTime
   */
 package object services {
 
-
   private[services] implicit class DateTimeTransformer(dt: LocalDateTime) {
     def toTimestamp: Timestamp = Timestamp.valueOf(dt)
   }

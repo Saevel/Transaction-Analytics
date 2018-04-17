@@ -47,7 +47,6 @@ configurations {
 }
 
 // TODO: Fix Spark provided dependencies.
-// TODO: Port to Akka HTTP?
 dependencies {
 
     compile project(':Events')
@@ -56,11 +55,9 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
-    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '1.6.0'
+    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '2.1.0'
 
-    compile group: 'io.spray', name: 'spray-can_2.11', version: '1.3.3'
-    compile group: 'io.spray', name: 'spray-routing_2.11', version: '1.3.3'
-    compile group: 'io.spray', name: 'spray-http_2.11', version: '1.3.3'
+    compile group: 'com.typesafe.akka', name: 'akka-http_2.11', version: '10.0.1'
 
     testCompile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.13.2'
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.6'
@@ -68,7 +65,6 @@ dependencies {
     integrationTestCompile group: 'io.spray', name: 'spray-client', version: '1.3.1'
 }
 
-// TODO: Get these from envs
 docker {
     url=System.getenv('DOCKER_MACHINE_URL')
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
@@ -81,10 +77,6 @@ docker {
     }
 }
 
-task fatJar(type: OneJar){
-    mainClass = 'org.dmcs.transaction.analytics.lambda.speed.layer.SpeedLayerApplication'
-}
-
 /**
  * Integration tests.
  */
@@ -92,6 +84,10 @@ task it(type: Test) {
     testClassesDir = sourceSets.integrationTest.output.classesDir
     classpath = sourceSets.integrationTest.runtimeClasspath
     outputs.upToDateWhen { false }
+}
+
+task fatJar(type: OneJar, dependsOn: build){
+    mainClass = 'org.dmcs.transaction.analytics.lambda.speed.layer.SpeedLayerApplication'
 }
 
 /**
@@ -106,7 +102,7 @@ task getConfigs(type: Copy){
     }
 }
 
-task prepareDockerBuild(type: Copy) {
+task prepareDockerBuild(type: Copy, dependsOn: [getConfigs, fatJar]) {
     from(project.buildDir.getAbsolutePath() + "/libs/" + project.name + "-" + project.version + "-standalone.jar")
     into(project.buildDir.getAbsolutePath() + "/docker")
 
@@ -114,27 +110,25 @@ task prepareDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/docker")
 }
 
-task dockerBuild(type: DockerBuildImage){
+task dockerBuild(type: DockerBuildImage, dependsOn: prepareDockerBuild){
     inputDir = project.file(project.buildDir.path + "/docker")
-    tag = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
 }
 
-task dockerize(type: DockerPushImage){
-    imageName = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
+task dockerize(type: DockerPushImage, dependsOn: dockerBuild){
+    imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer"
 }
 
-// TODO: Implement!
-task deploy {
-    logger.debug 'DCOS Deployment: Deploy SpeedLayer to Marathon'
-    // MesosphereDeployment.deployToMarathon("", null);
+task deploy(type: Exec, dependsOn: dockerize) << {
+    exec {
+        // TODO: Moar docker options.
+        //commandLine(("docker run " + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-speed-layer").tokenize())
+        commandLine "docker stack deploy -c application.yml lambda".tokenize()
+    }
 }
 
-// Task dependencies configuration
-deploy.dependsOn dockerize
-dockerize.dependsOn dockerBuild
-dockerBuild.dependsOn prepareDockerBuild
-prepareDockerBuild.dependsOn fatJar
-fatJar.dependsOn build
-compileScala.dependsOn getConfigs
-check.dependsOn it
-it.mustRunAfter test
+task undeploy(type: Exec) << {
+    exec {
+        commandLine "docker stack rm lambda".tokenize()
+    }
+}

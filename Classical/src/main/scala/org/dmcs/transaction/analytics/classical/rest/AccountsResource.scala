@@ -18,11 +18,11 @@ private[rest] trait AccountsResource extends UserAccountService with DefaultTime
 
   def accountsInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = {
     path("accounts" / "country" / Segment / "active") { country =>
-      onSuccess(countAccountsByCountry(country).run(DataAccessLayer.defaultUserAccountDao))(count =>
+      onSuccess(countAccountsByCountry(country).run(DataAccessLayer.userAccounts))(count =>
         complete(count.toString)
       )
     } ~ path("accounts" / "country" / Segment / "balance") { country =>
-      onSuccess(averageAccountBalanceByCountry(country).run(DataAccessLayer.defaultUserAccountDao))( count =>
+      onSuccess(averageAccountBalanceByCountry(country).run(DataAccessLayer.userAccounts))(count =>
         complete(count.toString)
       )
     }

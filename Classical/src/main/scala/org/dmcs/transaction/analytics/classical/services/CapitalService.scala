@@ -19,7 +19,7 @@ trait CapitalService {
         case CashOperation(_, _, _, CashOperationType.Withdrawal, amount) => (-1) * amount
         case CashOperation(_, _, _, CashOperationType.Transfer, _) => 0.0
         case CashOperation(_, _, _, CashOperationType.Insertion, amount) => amount
-      } reduce((first, second) => (first + second) / operations.length)))
+      }.foldLeft(0.0)((first, second) => (first + second) / operations.length)))
 
   private[classical] def averageOperationValue(kind: CashOperationType,
                                                start: Option[LocalDateTime],
@@ -27,7 +27,7 @@ trait CapitalService {
                                               (implicit executionContext: ExecutionContext): Reader[CashOperationsDao, Future[Double]] =
     findByKindAndInterval(kind, start, end)
       .andThen(future => future.map(operations =>
-        operations.map(_.amount).reduce((first, second) => (first + second) / operations.length))
+        operations.map(_.amount).foldLeft(0.0)((first, second) => (first + second) / operations.length))
       )
 
   private[services] def findByKindAndInterval(kind: CashOperationType, start: Option[LocalDateTime],

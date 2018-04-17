@@ -1,9 +1,8 @@
-import org.dmcs.transaction.analytics.gradle.SubprojectTaskCall
-
 group 'org.dmcs'
 
 version '1.0'
 
+/*
 buildscript {
     repositories {
         jcenter()
@@ -25,12 +24,14 @@ apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
 
+*/
 configurations {
-    acceptanceTestCompile{} extendsFrom compile
-    acceptanceTestRuntime{} extendsFrom runtime
+    // acceptanceTestCompile{} extendsFrom compile
+    // acceptanceTestRuntime{} extendsFrom runtime
 }
 
 sourceSets {
+    /*
     acceptanceTests {
         java {
             compileClasspath += main.output + configurations.acceptanceTestCompile
@@ -39,16 +40,17 @@ sourceSets {
         }
         resources.srcDir file('src/acceptance/resources')
     }
+    */
 }
 
 repositories {
-    mavenCentral()
-    jcenter()
+    // mavenCentral()
+    // jcenter()
 }
 
 dependencies {
-    compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
-    acceptanceTestCompile project(':TestFramework')
+    // compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
+    // acceptanceTestCompile project(':Tests')
 }
 
 docker {
@@ -63,14 +65,18 @@ docker {
     }
 }
 
+task dockerize(dependsOn: [':Lambda:BatchLayer:dockerize', ':Lambda:SpeedLayer:dockerize']){}
+
+task it(dependsOn: [':Lambda:BatchLayer:it', ':Lambda:SpeedLayer:it']){}
+
+/*
 task acceptanceTestCompile(type: ScalaCompile) {
-    source = fileTree(dir: 'src/acceptance/scala', include: '**/*.scala')
     destinationDir = file('build/classes/acceptance')
     classpath = sourceSets.acceptanceTests.runtimeClasspath
     scalaCompileOptions.incrementalOptions.analysisFile = new File("${buildDir}/tmp/scala/compilerAnalysis/compileCustomScala.analysis")
 }
 
-task acceptanceTestBaseJar(type: Jar){
+task acceptanceTestBaseJar(type: Jar, dependsOn: acceptanceTestCompile) {
     archiveName = 'Lambda-Acceptance-Tests-partial.jar'
     manifest {
         attributes(
@@ -81,13 +87,13 @@ task acceptanceTestBaseJar(type: Jar){
     from 'build/classes/acceptance'
 }
 
-task acceptanceTestJar(type: OneJar) {
+task acceptanceTestJar(type: OneJar, dependsOn: acceptanceTestBaseJar) {
     mainClass = 'org.dmcs.transaction.analytics.lambda.LambdaAcceptanceTestsApplication'
     baseJar = acceptanceTestBaseJar
     archiveName = 'Lambda-Acceptance-Tests.jar'
 }
 
-task prepareAcceptanceTestDockerBuild(type: Copy) {
+task prepareAcceptanceTestDockerBuild(type: Copy, dependsOn: acceptanceTestJar) {
     from(project.buildDir.getAbsolutePath() + "/libs/Lambda-Acceptance-Tests.jar")
     into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
 
@@ -95,39 +101,46 @@ task prepareAcceptanceTestDockerBuild(type: Copy) {
     into(project.buildDir.getAbsolutePath() + "/acceptance/docker")
 }
 
-task buildAcceptanceTestDocker(type: DockerBuildImage) {
+task buildAcceptanceTestDocker(type: DockerBuildImage, dependsOn: prepareAcceptanceTestDockerBuild) {
     inputDir = project.file(project.buildDir.path + "/acceptance/docker")
-    tag = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-acceptance-tests"
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-acceptance-tests"
 }
 
-task acceptanceTestDockerize(type: DockerPushImage) {
-    imageName = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + '/transaction-analytics-lambda-acceptance-tests'
+task acceptanceTestDockerize(type: DockerPushImage, dependsOn: buildAcceptanceTestDocker) {
+    imageName = System.getenv("DOCKER_USERNAME") + '/transaction-analytics-lambda-acceptance-tests'
+}
+*/
+
+/*
+task deployEnvironment(type: Exec) {
+    logger.println "Deploy Lambda environment to Docker Swarm"
+    commandLine "docker stack deploy -c environment.yml lambda_env".tokenize()
 }
 
-// TODO: Implement
-task acceptanceTest {
+task undeployEnvironment(type: Exec) {
+    commandLine 'docker stack rm lambda_env'.tokenize()
+}
+*/
+
+task deploy(type: Exec, dependsOn: [dockerize]) {
+    logger.println "Deploy Lambda application to Docker Swarm"
+    commandLine "docker stack deploy -c application.yml lambda".tokenize()
+}
+
+task undeploy(type: Exec) {
+    commandLine "docker stack rm lambda".tokenize()
+}
+
+/*
+task acceptanceTest(type: Exec, dependsOn: [deploy, acceptanceTestDockerize]) {
     logger.info("Acceptance Tests for the Lambda project")
-    // TODO: Deploy acceptance tests to Maraton.
+    commandLine "docker stack deploy -c acceptance-tests.yml lambda_acceptance_tests"
 }
+*/
 
-acceptanceTestBaseJar.dependsOn(acceptanceTestCompile)
-acceptanceTestJar.dependsOn(acceptanceTestBaseJar)
-prepareAcceptanceTestDockerBuild.dependsOn(acceptanceTestJar)
-buildAcceptanceTestDocker.dependsOn(prepareAcceptanceTestDockerBuild)
-acceptanceTestDockerize.dependsOn(buildAcceptanceTestDocker)
-acceptanceTest.dependsOn(acceptanceTestDockerize)
-
-task deploy {
-    logger.debug "DCOS Deployment: deploy all Lambda subprojects"
-    SubprojectTaskCall.callTaskIfExists(project, "deploy")
+/*
+task scale << {
+    int instances = Integer.parseInt(project.property("instances"))
+    scaleLambda(instances)
 }
-
-task dockerize {
-    SubprojectTaskCall.callTaskIfExists(project, "dockerize")
-}
-
-task it {
-    SubprojectTaskCall.callTaskIfExists(project, "it")
-}
-
-acceptanceTest.dependsOn(deploy)
+*/

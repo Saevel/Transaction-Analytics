@@ -8,4 +8,4 @@ COPY . /usr/src/Classical
 
 WORKDIR /usr/src/Classical
 
-ENTRYPOINT java -jar Classical-1.0-standalone.jar
+ENTRYPOINT java -Xmx1g -jar Classical-1.0-standalone.jar

@@ -20,13 +20,13 @@ private[rest] trait ClientsResource extends UsersService with DefaultTimeout {
   def clientsInterface(implicit actorSystem: ActorSystem, executionContext: ExecutionContext): Route = {
     path("clients" / "age" / "median") {
       get {
-        onSuccess(userAgeMedian.run(DataAccessLayer.defaultUserDataDao))( median =>
+        onSuccess(userAgeMedian.run(DataAccessLayer.userData))(median =>
           complete(median.toString)
         )
       }
     } ~ path("clients" / "age" / "average") {
       get {
-        onSuccess(averageUserAge.run(DataAccessLayer.defaultUserDataDao))( averageAge =>
+        onSuccess(averageUserAge.run(DataAccessLayer.userData))(averageAge =>
           complete(averageAge.toString)
         )
       }

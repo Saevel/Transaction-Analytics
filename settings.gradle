@@ -3,6 +3,7 @@ rootProject.name = 'Transaction-Analytics'
 include 'Lambda'
 include 'Classical'
 include 'TestFramework'
+include 'Tests'
 
 include 'Lambda:BatchLayer'
 include 'Lambda:SpeedLayer'

@@ -23,14 +23,14 @@ trait UsersProcessor extends UserEventsAdapter {
       removed
     }
 
-    val latestUpdates = updated.groupBy(_.id).mapGroups((id, iterator) =>
+    val latestUpdates = updated.groupByKey(_.id).mapGroups((id, iterator) =>
       iterator.reduce { (first, second) =>
         if(first.timestamp.after(second.timestamp)) first else second
       }
     )
 
     // TODO: Correct
-    created.subtract(createdButRemoved).joinWith(latestUpdates, $"id" === $"id").map{ pair =>
+    created.except(createdButRemoved).joinWith(latestUpdates, $"id" === $"id").map{ pair =>
       val (_, update) = pair
       update
     }

@@ -59,7 +59,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
-    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '1.6.0'
+    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '2.1.0'
 
     testCompile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.12.5'
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.6'
@@ -110,17 +110,17 @@ task prepareDockerBuild(type: Copy) {
 
 task dockerBuild(type: DockerBuildImage){
     inputDir = project.file(project.buildDir.path + "/docker")
-    tag = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-batch-layer"
+    tag = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-batch-layer"
 }
 
 task dockerize(type: DockerPushImage){
-    imageName = System.getenv("DOCKER_REGISTRY_URL") + "/" + System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-batch-layer"
+    imageName = System.getenv("DOCKER_USERNAME") + "/transaction-analytics-lambda-batch-layer"
 }
 
 task deploy {
     logger.debug "DCOS Deployment: Deploy BatchLayer to Chronos"
     /*
-    MesosphereDeployment.deployToChronos(System.getenv("DCOS_URL") + "/chronos",
+    MesosphereDeployment.deployToChronos(System.getenv("DCOS_URL"),
             new ChronosJob("BatchLayer",
                 "java -jar -Xmx8g /usr/src/BatchLayer-1.0-standalone.jar",
                 "PT3M",

@@ -1,3 +1,21 @@
+import org.dmcs.transaction.analytics.swarm.Deployment
+import org.dmcs.transaction.analytics.swarm.RestartPolicy
+import org.dmcs.transaction.analytics.swarm.Service
+import org.dmcs.transaction.analytics.swarm.Stack
+import org.dmcs.transaction.analytics.swarm.SwarmDeployment
+import org.dmcs.transaction.analytics.swarm.environment.Variable
+import org.dmcs.transaction.analytics.swarm.networks.NetworkDefinition
+import org.dmcs.transaction.analytics.swarm.networks.NetworkDriver
+import org.dmcs.transaction.analytics.swarm.ports.PortMapping
+import org.dmcs.transaction.analytics.swarm.resources.Memory
+import org.dmcs.transaction.analytics.swarm.resources.MemoryUnit
+import org.dmcs.transaction.analytics.swarm.resources.ResourceLimits
+import org.dmcs.transaction.analytics.swarm.resources.Resources
+import org.dmcs.transaction.analytics.swarm.restart.RestartCondition
+import org.dmcs.transaction.analytics.utils.Maps
+import org.dmcs.transaction.analytics.utils.PropertyMap
+import org.dmcs.transaction.analytics.utils.Tuple
+
 group 'org.dmcs'
 
 version '1.0'
@@ -17,9 +35,6 @@ apply plugin: 'groovy'
 
 apply plugin: 'com.bmuschko.docker-remote-api'
 
-import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-import org.dmcs.transaction.analytics.gradle.SubprojectTaskCall
-
 repositories {
     mavenCentral()
     jcenter()
@@ -30,18 +45,66 @@ docker {
     certPath=file(System.getenv('DOCKER_CERT_PATH'))
 }
 
-task it {
-    SubprojectTaskCall.callTaskIfExists(project, 'it')
+task it(dependsOn: [':Classical:it', ":Lambda:it"]) {
+    logger.println("Integration Tests for all applications")
 }
 
-import org.dmcs.transaction.analytics.mesosphere.chronos.ChronosJob
-
-task dockerize {
-    SubprojectTaskCall.callTaskIfExists(project, "dockerize")
+task dockerize(dependsOn: [':Classical:dockerize', ':Lambda:dockerize']) {
+    logger.println("Dockerize all applications")
 }
 
-// TODO: Deploy TESTS last
-task deploy {
-    logger.debug "DCOS Deployment: Deploy all subprojects"
-    SubprojectTaskCall.callTaskIfExists(project, "deploy")
+task deployEnvironment(type: Exec) {
+    commandLine 'docker stack deploy -c environment.yml env'.tokenize()
 }
+
+task undeployEnvironment(type: Exec) {
+    commandLine 'docker stack rm env'.tokenize()
+}
+
+void scaleService(String name, int count){
+    exec {
+        commandLine "docker service scale $name=$count".tokenize()
+    }
+}
+
+void scaleClassical(int instances){
+    ['classical_cassandra-node', 'classical_transaction-analytics'].each { service -> scaleService(service, instances) }
+}
+
+void scaleLambda(int instances){
+    ['lambda_hdfs-datanode', 'lambda_spark-worker', 'lambda_speed-layer'].each { service -> scaleService(service, instances) }
+}
+
+void acceptanceTest(String type, String httpHost, int httpPort){
+    exec {
+        commandLine "docker run saevel/transaction-analytics-tests"
+    }
+}
+
+
+
+task testClassical(dependsOn: [deployEnvironment, ':Classical:deploy', ':Tests:dockerize']) << {
+    int maxInstances = project.property("maxInstances");
+    acceptanceTest();
+    for(int i = 2; i <= maxInstances; i++) {
+        scaleClassical(i);
+        acceptanceTestClassical();
+    }
+}
+
+testClassical.finalizedBy ':Classical:undeploy'
+
+task testLambda(dependsOn: [deployEnvironment, 'Lambda:deploy'])
+
+/*
+task generateSampleStack {
+    SwarmDeployment.generateDescriptor(new Stack(
+            "3",
+            Maps.map(
+                    new Tuple("service-app", new Service("saevel/http-app", new Deployment(2, new Resources(new ResourceLimits(0.5, new Memory(124, MemoryUnit.Megabytes))), new RestartPolicy(RestartCondition.none)), Arrays.asList(new PortMapping(8080, 8080)), Arrays.asList("sample"), PropertyMap.from())),
+                    new Tuple("proxy-app", new Service("saevel/http-proxy", new Deployment(1, new Resources(new ResourceLimits(0.5, new Memory(124, MemoryUnit.Megabytes))), new RestartPolicy(RestartCondition.none)), Arrays.asList(new PortMapping(8090, 8090)), Arrays.asList("sample"), PropertyMap.from(new Variable("server.port", "8090"), new Variable("SERVICE_URL", "http://service-app:8080/hello"))))
+            ),
+            Maps.map(new Tuple("sample", new NetworkDefinition(NetworkDriver.overlay))),
+    ));
+}
+*/

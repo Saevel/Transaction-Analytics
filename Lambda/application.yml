@@ -1,0 +1,55 @@
+version: "3"
+
+networks:
+    lambda-network:
+        driver: overlay
+
+services:
+
+    speed-layer:
+      image: saevel/transaction-analytics-lambda-speed-layer
+      deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+      ports:
+      - 9990:9990
+      networks:
+      - lambda-network
+
+    batch-layer:
+      image: saevel/transaction-analytics-lambda-batch-layer
+      deploy:
+        replicas: 1
+        restart_policy:
+          condition: on-failure
+      networks:
+      - lambda-network
+
+    # HDFS NAMENODE
+    hdfs-namenode:
+        image: sfedyakov/hadoop-271-cluster
+        hostname: namenode
+        ports:
+          - 8088:8088
+          - 50090:50090
+          - 19888:19888
+        command: "/etc/bootstrap.sh -d -namenode"
+        deploy:
+            restart_policy:
+                condition: on-failure
+        networks:
+        - lambda-network
+
+    # HDFS DATANODE
+    hdfs-datanode:
+        depends_on:
+        - namenode
+        image: sfedyakov/hadoop-271-cluster
+        command: "/etc/bootstrap.sh -d -datanode"
+        deploy:
+            replicas: 3
+            restart_policy:
+                condition: on-failure
+        networks:
+        - lambda-network

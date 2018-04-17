@@ -10,7 +10,7 @@ public class DockerContainer extends Container {
 
     private Docker docker;
 
-    public DockerContainer(ContainerType type, Collection<PersistentVolume> volumes, Docker docker) {
+    public DockerContainer(Collection<PersistentVolume> volumes, Docker docker) {
         super(ContainerType.DOCKER, volumes);
         this.docker = docker;
     }

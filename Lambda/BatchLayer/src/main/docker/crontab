@@ -1,0 +1,2 @@
+*/5 * * * * root java -jar -Xmx8g /usr/src/BatchLayer/BatchLayer-1.0-standalone.jar >> /var/log/cron.log 2>&1
+# An empty line is required at the end of this file for a valid cron file.

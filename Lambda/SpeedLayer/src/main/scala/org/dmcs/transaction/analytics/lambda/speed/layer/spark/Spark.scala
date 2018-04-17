@@ -14,7 +14,7 @@ trait Spark {
 
   val sparkProperties: Bundle = load(classpath :/ "spark.properties")
 
-  def withSpark[T](f: SparkContext => T) = {
+  def withSpark[T](f: SparkContext => T): T = {
     var contextOption: Option[SparkContext] = None;
     try {
       contextOption = Option(
@@ -30,5 +30,5 @@ trait Spark {
     }
   }
 
-  def withSparkSql[T](f: SQLContext => T)(implicit sparkContext: SparkContext) = f(new SQLContext(sparkContext))
+  def withSparkSql[T](f: SQLContext => T)(implicit sparkContext: SparkContext): T = f(new SQLContext(sparkContext))
 }
