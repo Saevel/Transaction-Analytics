@@ -18,8 +18,6 @@ object BatchLayerApplication extends App with AccountsProcessor with UsersProces
   val usersPath: String = %("batch.views.users" @@ batchProperties)
   val cashOperationsPath: String = %("batch.views.capital" @@ batchProperties)
 
-  //TODO: Real data!
-
   withSpark { implicit sparkContext =>
     withSparkSql { implicit sqlContext =>
       import sqlContext.implicits._

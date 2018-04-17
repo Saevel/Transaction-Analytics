@@ -59,7 +59,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
     compile group: 'org.scala-lang', name: 'scala-library', version: '2.11.8'
-    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '1.6.0'
+    compile group: 'org.apache.spark', name: 'spark-sql_2.11', version: '2.1.0'
 
     testCompile group: 'org.scalacheck', name: 'scalacheck_2.11', version: '1.12.5'
     testCompile group: 'org.scalatest', name: 'scalatest_2.11', version: '2.2.6'
